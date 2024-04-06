@@ -1,0 +1,61 @@
+header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 86px;
+  display: flex;
+  z-index: 1;
+
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    ul {
+      display: flex;
+      li {
+        margin-left: 48px;
+        &:first-child{
+          margin-left: 0px;
+        }
+      }
+    }
+  }
+
+  .btn, .dropdown {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    img {
+      margin-right: 8px;
+    }
+  }
+
+  .dropdown {
+    select {
+      width: 130px;
+      font-size: 16px;
+    }
+    &.mic select {
+      width: 165px;
+    }
+    max-width: 100%;
+  }
+
+  .btn-finish {
+    padding: 0px 8px;
+    line-height: 30px;
+    border-radius: 100px;
+    background-color: $red;
+  }
+}

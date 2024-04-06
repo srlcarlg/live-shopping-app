@@ -1,5 +1,6 @@
 // Base
 @import 'base/colors';
+@import 'base/container';
 @import 'base/reset';
 @import 'base/typography';
 
@@ -9,11 +10,8 @@
 // @import 'layout/grid';
 // @import 'layout/navigation';
 
-// // Components
-// @import 'components/buttons';
-// @import 'components/forms';
-// @import 'components/cards';
-// @import 'components/modals';
+// Components
+@import 'components/header';
 
 // // Utils
 // @import 'utils/variables';
