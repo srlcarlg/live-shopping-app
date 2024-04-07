@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Chat from "./components/Chat";
 import Description from "./components/Description";
 import Header from "./components/Header";
 import Video from "./components/Video";
@@ -10,7 +11,12 @@ function App() {
   return (
     <>
       <Header />
-      <Video />
+      <section className="video-and-chat">
+        <div className="container">
+          <Video />
+          <Chat />
+        </div>
+      </section>
       <Description />
     </>
   );

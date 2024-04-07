@@ -1,9 +1,10 @@
 * {
-  background-color: $gray-blue-100;
+  background-color: transparent;
   color: white;
 
   margin: 0;
   padding: 0;
+
   outline: none;
   border: none;
   text-decoration: none;
@@ -13,13 +14,9 @@
 
 html {
   font-size: 62.5%;
-}
-
-img {
-  background-color: transparent;
+  background-color: $gray-blue-100;
 }
 
 button {
-  background-color: transparent;
   cursor: pointer;
 }
