@@ -7,7 +7,7 @@
 }
 
 // Source Serif 4 Bold - Modal Title/Prices
-.source-serif-4-bold {
+.price {
   font-family: "Source Serif 4", serif;
   font-optical-sizing: auto;
   font-weight: 700;
@@ -15,14 +15,18 @@
 }
 
 // Poppins Light - Modal Buttons/ Header -> Drop-down list
-.btn-finish .dropdown {
+.btn-finish,
+.dropdown,
+.timeleft,
+.units,
+.buy-text {
   font-family: "Poppins", sans-serif;
   font-weight: 300;
   font-style: normal;
 }
 
-// Chat/Shop tab and shop-add button
-.poppins-medium {
+// Poppins	Medium - Chat/Shop tab and shop-add button
+.text {
   font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-style: normal;
