@@ -1,3 +1,4 @@
+// Header.tsx
 header {
   position: absolute;
   top: 0;
@@ -5,7 +6,6 @@ header {
   height: 86px;
   display: flex;
   z-index: 1;
-
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 
   .container {
@@ -46,6 +46,7 @@ header {
     }
   }
 
+  // DeviceSelector.tsx
   .dropdown {
     select {
       width: 130px;

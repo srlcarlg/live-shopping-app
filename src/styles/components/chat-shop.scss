@@ -1,3 +1,4 @@
+// Shop.tsx
 .video-and-chat .chat .border-container .border-shop .shop {
   .shop-header {
     background-color: $gray-blue-400-opacity;
@@ -44,16 +45,16 @@
       border-radius: 10px;
       display: grid;
       grid-template-columns: 1fr;
-      //grid-auto-rows: 115px;
+      // grid-auto-rows: 115px;
       grid-gap: 7px;
       overflow: auto;
 
+      // Product.tsx
       .product-container {
         width: 362px;
         height: 115px;
         background-color: $another-black-transparency;
         display: inline-flex;
-
         align-items: center;
 
         img {
@@ -113,6 +114,7 @@
                 padding: 0px 8px;
                 border-radius: 100px;
                 background-color: $red;
+
                 &.broadcaster {
                   background-color: $purple;
                 }

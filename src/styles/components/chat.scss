@@ -1,9 +1,9 @@
+// Chat.tsx
 .video-and-chat .chat .shape {
   background-color: $gray-blue-200;
   height: 585px;
   width: 448px;
   border-radius: 10px;
-
   display: flex;
   flex-direction: column;
 
@@ -83,12 +83,12 @@
     }
   }
 
+  // Input.tsx - probably
   .input-container {
     width: 411px;
     height: 85px;
     border-radius: 10px;
     background-color: $black-opacity;
-
     display: flex;
     justify-content: center;
     align-self: center;
@@ -100,7 +100,6 @@
       border-radius: 4px;
       background-color: $gray-blue-300;
       align-self: center;
-
       display: inline-flex;
       align-content: center;
       align-items: center;
