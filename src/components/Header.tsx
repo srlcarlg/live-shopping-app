@@ -1,5 +1,5 @@
 import finishIcon from "../assets/header-icons/finish-icon.svg";
-import DeviceSelector from "./DeviceSelector";
+import DeviceSelector from "./Header/DeviceSelector";
 
 type Props = {};
 
