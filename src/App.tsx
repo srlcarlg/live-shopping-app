@@ -1,5 +1,8 @@
 import { useState } from "react";
-import PaymentModal from "./components/Modals/PaymentModal";
+import Chat from "./components/Chat";
+import Description from "./components/Description";
+import Header from "./components/Header";
+import Video from "./components/Video";
 import "./styles/index.scss";
 
 function App() {
@@ -7,15 +10,14 @@ function App() {
 
   return (
     <>
-      {/* <Header />
+      <Header />
       <section className="video-and-chat">
         <div className="container">
           <Video />
           <Chat />
         </div>
       </section>
-      <Description /> */}
-      <PaymentModal />
+      <Description />
     </>
   );
 }

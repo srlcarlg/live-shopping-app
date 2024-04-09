@@ -3,10 +3,18 @@ import successfulIcon from "../../assets/successful.svg";
 import InputModal from "./Input";
 import ProductCount from "./ProductCount";
 
-type Props = {};
+type Props = {
+  cancelOnClick: (value: boolean) => void;
+};
 
 const PaymentModal = (props: Props) => {
   const [successful, setSuccessful] = React.useState(false);
+
+  const [cancelClick, setCancelClick] = React.useState(false);
+  const handleCancel = () => {
+    props.cancelOnClick(cancelClick);
+    setCancelClick(!cancelClick);
+  };
 
   return (
     <div className="modal-screen" id="any-modal">
@@ -55,7 +63,9 @@ const PaymentModal = (props: Props) => {
           )}
           {!successful ? (
             <div className="btn-area">
-              <button className="btn btn-cancel">Cancel</button>
+              <button className="btn btn-cancel" onClick={handleCancel}>
+                Cancel
+              </button>
               <button type="submit" className="btn btn-payment-submit">
                 Confirm Payment
               </button>

@@ -1,10 +1,18 @@
 import React from "react";
 import InputModal from "./Input";
 
-type Props = {};
+type Props = {
+  isDelete?: boolean;
+  cancelOnClick: (value: boolean) => void;
+};
 
 const ProductModal = (props: Props) => {
-  const [isDelete, setIsDelete] = React.useState(false);
+  const { isDelete } = props;
+  const [cancelClick, setCancelClick] = React.useState(false);
+  const handleCancel = () => {
+    props.cancelOnClick(cancelClick);
+    setCancelClick(!cancelClick);
+  };
 
   return (
     <div className="modal-screen" id="any-modal">
@@ -52,7 +60,9 @@ const ProductModal = (props: Props) => {
             <div></div>
           )}
           <div className="btn-area">
-            <button className="btn btn-cancel">Cancel</button>
+            <button className="btn btn-cancel" onClick={handleCancel}>
+              Cancel
+            </button>
             {!isDelete ? (
               <button type="submit" className="btn btn-product-submit">
                 Confirm
