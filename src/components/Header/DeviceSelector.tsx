@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-import cameraIcon from "../assets/header-icons/camera-icon.svg";
-import micIcon from "../assets/header-icons/mic-icon.svg";
+import cameraIcon from "../../assets/header-icons/camera-icon.svg";
+import micIcon from "../../assets/header-icons/mic-icon.svg";
 
 interface MediaDeviceInfo {
   deviceId: string;
