@@ -6,6 +6,7 @@ import java.util.List;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -14,9 +15,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import live.manager.entities.Live;
 import live.manager.entities.LiveStatus;
+import live.manager.utils.RandomGenerator;
 
 @Path("/lives")
 public class LiveResource {
+	
+	@Inject 
+	RandomGenerator randomGenerator;
 	
     @GET
     public Uni<List<Live>> getAll() {
@@ -32,8 +37,8 @@ public class LiveResource {
     @POST
     public Uni<Response> create(Live liveRequest) {
 		Live live = new Live(
-			liveRequest.getSlug(), liveRequest.getTitle(),
-			liveRequest.getDescription(), liveRequest.getPassword(),
+			randomGenerator.randomString(14),
+			liveRequest.getTitle(), liveRequest.getDescription(), liveRequest.getPassword(),
 			LiveStatus.AVAILABLE, LocalDateTime.now()
 		);
 		return Panache.withTransaction(live::persist)
