@@ -38,5 +38,4 @@ public class LiveGrpcService implements LiveGrpc {
 		        .onItem().ifNull()
 		        	.continueWith(LiveResponse.getDefaultInstance());
 	}
-
 }
