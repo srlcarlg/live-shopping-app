@@ -17,7 +17,7 @@ import jakarta.websocket.server.ServerEndpoint;
 @ApplicationScoped
 public class WebSocketServer {
 	
-	private static Map<String, ConcurrentLinkedDeque<Session>> ROOMS = new ConcurrentHashMap<>();
+	public static Map<String, ConcurrentLinkedDeque<Session>> ROOMS = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("slug") String slug) {
