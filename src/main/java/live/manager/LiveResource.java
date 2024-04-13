@@ -3,8 +3,6 @@ package live.manager;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import io.quarkus.hibernate.reactive.panache.Panache;
-import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -25,7 +23,7 @@ public class LiveResource {
 	
     @GET
     public Uni<List<Live>> getAll() {
-        return Live.listAll(Sort.by("title"));
+        return Live.getAllLives();
     }
 
     @GET
@@ -41,7 +39,7 @@ public class LiveResource {
 			liveRequest.getTitle(), liveRequest.getDescription(), liveRequest.getPassword(),
 			LiveStatus.AVAILABLE, LocalDateTime.now()
 		);
-		return Panache.withTransaction(live::persist)
+		return live.persist()
                 .replaceWith(Response.ok(live).status(Status.CREATED)::build);
 	}
     

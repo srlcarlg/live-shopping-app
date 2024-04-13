@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
 import jakarta.persistence.Entity;
 
@@ -31,7 +32,7 @@ public class Live extends PanacheEntity {
 
 	// Active record pattern 
     public static Uni<List<Live>> getAllLives() {
-    	return findAll().list();
+    	return findAll(Sort.by("title")).list();
 		
 	}
     public static Uni<Live> findBySlug(String slug){
