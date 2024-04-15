@@ -1,8 +1,5 @@
 package live.manager.decoders;
 
-/**
- * 
- */
 public class ReceivedMessage {
 	private String jsPeerId;
 	private String livePassword;
@@ -43,6 +40,4 @@ public class ReceivedMessage {
 	public String toString() {
 		return "ReceivedMessage{jsPeerId=" + jsPeerId + ", livePassword=" + livePassword + ", string=" + string + "}";
 	}
-	
-	
 }
