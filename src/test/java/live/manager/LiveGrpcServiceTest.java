@@ -24,7 +24,12 @@ public class LiveGrpcServiceTest {
     @InjectMock
     @GrpcClient("something")
     LiveGrpc client; 
-
+    
+	LiveResponse liveResponse = LiveResponse.newBuilder()
+	        .setSlug("slug1")
+			.setTitle("Title").setDescription("Description")
+			.setStatus(LiveStatus.AVAILABLE.toString()).setCreatedAt(LocalDateTime.now().toString()).build();	
+	
 	@BeforeEach
 	void before() {
         PanacheMock.mock(Live.class);
@@ -32,30 +37,20 @@ public class LiveGrpcServiceTest {
 	
     @Test
     public void testFindOneBySlug() {
-    	LiveResponse liveResponse = LiveResponse.newBuilder()
-	        .setSlug("test-slug")
-			.setTitle("Test Title").setDescription("Test Description")
-			.setStatus(LiveStatus.AVAILABLE.toString()).setCreatedAt(LocalDateTime.now().toString()).build();		        		
-        
         Mockito.when(client.findOneBySlug(Mockito.any(SlugRequest.class)))
     		.thenReturn(Uni.createFrom().item(liveResponse));
 
-        SlugRequest request = SlugRequest.newBuilder().setSlug("test-slug").build();
+        SlugRequest request = SlugRequest.newBuilder().setSlug("slug1").build();
         LiveResponse response = client.findOneBySlug(request).await().indefinitely();
         
         Assertions.assertEquals(liveResponse.toString(), response.toString());
     }
 
     @Test
-    public void testLogin() {
-    	LiveResponse liveResponse = LiveResponse.newBuilder()
-    	        .setSlug("test-slug")
-    			.setTitle("Test Title").setDescription("Test Description")
-    			.setStatus(LiveStatus.AVAILABLE.toString()).setCreatedAt(LocalDateTime.now().toString()).build();		        		
-
+    public void testLogin() {	        		
         // Correct password
         LoginRequest request = LoginRequest.newBuilder()
-            .setSlug("test-slug")
+            .setSlug("slug1")
             .setPassword("correctPassword")
             .build();
         
@@ -68,7 +63,7 @@ public class LiveGrpcServiceTest {
         
         // Wrong password
         LoginRequest requestWrong = LoginRequest.newBuilder()
-            .setSlug("test-slug")
+            .setSlug("slug1")
             .setPassword("wrongPassword")
             .build();
 

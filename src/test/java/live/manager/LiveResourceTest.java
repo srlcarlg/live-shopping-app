@@ -20,7 +20,9 @@ import live.manager.entities.LiveStatus;
 @QuarkusTest
 @TestHTTPEndpoint(LiveResource.class) 
 class LiveResourceTest {
-	
+    
+	Live live = new Live("randomSlug", "Title", "Description", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now());
+
 	@BeforeEach
 	void before() {
         PanacheMock.mock(Live.class);
@@ -28,24 +30,19 @@ class LiveResourceTest {
 	
 	@Test
 	public void testGetAll() {        
-	    List<Live> lives = List.of(new Live("random", "Title Test", "Desc", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now()));
-	    
+	    List<Live> lives = List.of(live);
 	    Mockito.when(Live.getAllLives()).thenReturn(Uni.createFrom().item(lives));
-
 	    given()
 	        .when().get()
 	        .then()
 	        .statusCode(200)
 	        .body("$.size()", is(1),
-	              "[0].title", is("Title Test"));
+	              "[0].title", is("Title"));
 	}
 	
 	@Test
 	public void testFindOneBySlug() {        
-	    Live live = new Live("randomSlug", "Title", "Description", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now());
-	    
 	    Mockito.when(Live.findBySlug("randomSlug")).thenReturn(Uni.createFrom().item(live));
-
 	    given()
 	        .when().get("/{slug}", "randomSlug")
 	        .then()
@@ -55,17 +52,14 @@ class LiveResourceTest {
 	
 	@Test
 	public void testCreate() {        
-	    Live live = new Live("randomGeneratedSlug", "NewTitle", "NewDesc", "NewPass", LiveStatus.AVAILABLE, LocalDateTime.now());
-
 	    Mockito.when(Live.persist(live)).thenReturn(Uni.createFrom().nullItem());
-
 	    given()
 	        .contentType("application/json")
 	        .body(live)
 	        .when().post()
 	        .then()
 	        .statusCode(201)
-	        .body("title", is("NewTitle"));
+	        .body("title", is("Title"));
 	}
 
 	@Test
