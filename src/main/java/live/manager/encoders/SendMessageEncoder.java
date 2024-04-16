@@ -14,7 +14,7 @@ public class SendMessageEncoder implements Encoder.Text<SendMessage> {
 				    .toString();
 		} else if (object.getUsersCount() != null) {
 			return Json.createObjectBuilder()
-				    .add("users-count", object.getUsersCount())
+				    .add("users_count", object.getUsersCount())
 				    .build()
 				    .toString();
 		} else {

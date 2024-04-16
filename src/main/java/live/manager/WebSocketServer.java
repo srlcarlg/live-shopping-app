@@ -3,9 +3,12 @@ package live.manager;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.vertx.VertxContextSupport;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
@@ -33,11 +36,10 @@ import live.manager.entities.LiveStatus;
 @ApplicationScoped
 public class WebSocketServer {
 
+	
 	protected static final Map<String, ConcurrentLinkedDeque<Session>> ROOMS = new ConcurrentHashMap<>();
 	protected static final Map<String, String> BROADCASTERS_ID = new ConcurrentHashMap<>();
-	
-	protected static final ConcurrentLinkedDeque<Thread> VIRTUAL_THREADS = new ConcurrentLinkedDeque<>();
-	// TODO: Scheduled closing of virtual threads
+	public static ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	@OnOpen
 	public void onOpen(Session session, @PathParam("slug") String slug) {
@@ -68,7 +70,7 @@ public class WebSocketServer {
 	public void onClose(Session session, @PathParam("slug") String slug) {
 		if (ROOMS.containsKey(slug)) {
 			ROOMS.get(slug).remove(session);
-			sendToAll(slug, new UsersCount(ROOMS.get(slug).size()), session);
+			sendToAllInclude(slug, new UsersCount(ROOMS.get(slug).size()));
 		}
 	}
 
@@ -84,32 +86,30 @@ public class WebSocketServer {
 			// Workaround to "IllegalStateException: No current Vertx context found",
 			// even using Panache.withSession() and .withTransaction() like in the @OnOpen method.
 			// and also we cannot block the current Vert.x Thread with VertxContextSupport.subscribeAndAwait()
-			Thread vtThread = Thread.startVirtualThread(() -> {
+			executorService.submit(() -> {
 				try { setBroadcaster(session, slug, message); } catch (Throwable e) {}
 			});
-			VIRTUAL_THREADS.add(vtThread);
-
+			
 		} else if (message instanceof SetLiveStatus) {
-			Thread vtThread = Thread.startVirtualThread(() -> {
-				try { setLiveStatus(session, slug, message); } catch (Throwable e) {}
+			executorService.submit(() -> {
+				try { setLiveStatus(session, slug, message); } catch (Throwable e) {
+					e.printStackTrace();
+				}
 			});
-			VIRTUAL_THREADS.add(vtThread);
 			
 		} else {
 			switch (message.getString()) {
 			case "join":
 				if (!BROADCASTERS_ID.get(slug).equals("")) {
-					sendToAll(slug, new BroadcasterId(BROADCASTERS_ID.get(slug)), session);
+					sendAsync(session, new BroadcasterId(BROADCASTERS_ID.get(slug)));
 				}
-				sendToAll(slug, new UsersCount(ROOMS.get(slug).size()), session);
+				sendToAllExcept(slug, new UsersCount(ROOMS.get(slug).size()), session);
 				break;
-
 			case "leave":
 				ROOMS.get(slug).remove(session);
-				sendToAll(slug, new UsersCount(ROOMS.get(slug).size()), session);
+				sendToAllExcept(slug, new UsersCount(ROOMS.get(slug).size()), session);
 				closeSession(session);
 				break;
-
 			default:
 				sendAsync(session, new SendMessage("unknown-command"));
 				break;
@@ -127,9 +127,8 @@ public class WebSocketServer {
 					sendAsync(session, new SendMessage("incorrect-password"));
 				}
 			}, failure -> {});
-			// Better than NullPointerException of Panache.withSession(null)
-			// or doing panache.withSession(() -> Live.findBySlug(slug)) again
-			return Panache.currentTransaction();
+			
+			return Uni.createFrom().nullItem();
 		});
 	}
 
@@ -137,20 +136,16 @@ public class WebSocketServer {
 		VertxContextSupport.subscribeAndAwait(() -> {
 			Panache.withSession(() -> Live.findBySlug(slug)).subscribe().with(item -> {
 				if (item.password.equals(message.getLivePassword())) {
-					
-					Thread vtThread = Thread.startVirtualThread(() -> {
+					executorService.submit(() -> {
 						try { changeLiveStatus(slug); } catch (Throwable e) {}
 					});
-					VIRTUAL_THREADS.add(vtThread);
-					sendToAll(slug, new SendMessage("live-finished"), session);
-					
+					sendToAllExcept(slug, new SendMessage("live-finished"), session);
 				} else {
 					sendAsync(session, new SendMessage("incorrect-password"));
 				}
 			}, failure -> {});
-			// Better than NullPointerException of Panache.withSession(null)
-			// or doing panache.withSession(() -> Live.findBySlug(slug)) again
-			return Panache.currentTransaction();
+			
+			return Uni.createFrom().nullItem();
 		});
 	}
 
@@ -161,7 +156,7 @@ public class WebSocketServer {
 		});
 	}
 
-	private void sendToAll(String slug, SendMessage message, Session currentSession) {
+	private void sendToAllExcept(String slug, SendMessage message, Session currentSession) {
 		ROOMS.get(slug).parallelStream().forEach(session -> {
 			if (!session.equals(currentSession)) {
 				sendAsync(session, message);
