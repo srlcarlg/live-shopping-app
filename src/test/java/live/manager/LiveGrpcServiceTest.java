@@ -20,16 +20,10 @@ import live.manager.entities.LiveStatus;
 @QuarkusTest
 public class LiveGrpcServiceTest {
     
-
     @InjectMock
     @GrpcClient("something")
-    LiveGrpc client; 
-    
-	LiveResponse liveResponse = LiveResponse.newBuilder()
-	        .setSlug("slug1")
-			.setTitle("Title").setDescription("Description")
-			.setStatus(LiveStatus.AVAILABLE.toString()).setCreatedAt(LocalDateTime.now().toString()).build();	
-	
+    LiveService client; 
+        
 	@BeforeEach
 	void before() {
         PanacheMock.mock(Live.class);
@@ -37,6 +31,13 @@ public class LiveGrpcServiceTest {
 	
     @Test
     public void testFindOneBySlug() {
+    	LiveResponse liveResponse = LiveResponse.newBuilder()
+    	        .setSlug("slug1")
+    			.setTitle("Title").setDescription("Description")
+    			.setStatus(LiveStatus.AVAILABLE.toString())
+    			.setCreatedAt(LocalDateTime.now().toString())
+    			.build();	
+    	
         Mockito.when(client.findOneBySlug(Mockito.any(SlugRequest.class)))
     		.thenReturn(Uni.createFrom().item(liveResponse));
 
@@ -47,31 +48,49 @@ public class LiveGrpcServiceTest {
     }
 
     @Test
-    public void testLogin() {	        		
+    public void testValidate() {	    
+    	
         // Correct password
-        LoginRequest request = LoginRequest.newBuilder()
+        ValidateRequest request = ValidateRequest.newBuilder()
             .setSlug("slug1")
             .setPassword("correctPassword")
             .build();
+        ValidateResponse validResponse = ValidateResponse.newBuilder()
+            .setIsValid(true)
+            .build();
         
-        Mockito.when(client.login(request))
-			.thenReturn(Uni.createFrom().item(liveResponse));
+        Mockito.when(client.validate(request))
+			.thenReturn(Uni.createFrom().item(validResponse));
         
-        LiveResponse response = client.login(request).await().indefinitely();
+        ValidateResponse response = client.validate(request).await().indefinitely();
 
-        assertEquals(liveResponse.toString(), response.toString());
+        assertEquals(validResponse.toString(), response.toString());
         
-        // Wrong password
-        LoginRequest requestWrong = LoginRequest.newBuilder()
+        // Wrong password or slug not found = empty json
+        request = ValidateRequest.newBuilder()
             .setSlug("slug1")
             .setPassword("wrongPassword")
             .build();
-
-        Mockito.when(client.login(requestWrong))
-			.thenReturn(Uni.createFrom().item(LiveResponse.getDefaultInstance()));
+        validResponse = ValidateResponse.getDefaultInstance();
         
-        LiveResponse responseWrong = client.login(requestWrong).await().indefinitely();
+        Mockito.when(client.validate(request))
+			.thenReturn(Uni.createFrom().item(validResponse));
+        
+        response = client.validate(request).await().indefinitely();
 
-        assertEquals(LiveResponse.getDefaultInstance().toString(), responseWrong.toString());
+        assertEquals(validResponse.toString(), response.toString());
+        
+        // Wrong slug
+        request = ValidateRequest.newBuilder()
+            .setSlug("WrongSlug")
+            .setPassword("pass")
+            .build();
+        
+        Mockito.when(client.validate(request))
+			.thenReturn(Uni.createFrom().item(validResponse));
+        
+        response = client.validate(request).await().indefinitely();
+
+        assertEquals(ValidateResponse.getDefaultInstance().toString(), response.toString());
     }
 }

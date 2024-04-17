@@ -6,7 +6,7 @@ import io.smallrye.mutiny.Uni;
 import live.manager.entities.Live;
 
 @GrpcService
-public class LiveGrpcService implements LiveGrpc {
+public class LiveGrpcService implements LiveService {
 
 	@Override
 	@WithSession
@@ -14,27 +14,22 @@ public class LiveGrpcService implements LiveGrpc {
 		return Live.findBySlug(request.getSlug()).onItem().ifNotNull().transform(
 	        	entity ->  LiveResponse.newBuilder()
 	        		.setSlug(entity.slug)
-	        		.setTitle(entity.title).setDescription(entity.description)
+	        		.setTitle(entity.title)
+	        		.setDescription(entity.description)
 	        		.setStatus(entity.status.toString())
 	        		.setCreatedAt(entity.createdAt.toString()).build()		        		
 	        	)
-		        .onItem().ifNull()
-		        .continueWith(LiveResponse.getDefaultInstance());
+		        .onItem().ifNull().continueWith(LiveResponse.getDefaultInstance());
 	}
 
 	@Override
 	@WithSession
-	public Uni<LiveResponse> login(LoginRequest request) {
-		return Live.findBySlug(request.getSlug()).onItem().ifNotNull().transform(
-		        entity -> entity.password.contentEquals(request.getPassword()) 
-    				?	LiveResponse.newBuilder()
-		        		.setSlug(entity.slug)
-		        		.setTitle(entity.title).setDescription(entity.description)
-		        		.setStatus(entity.status.toString())
-		        		.setCreatedAt(entity.createdAt.toString()).build()
-		        	: LiveResponse.getDefaultInstance()		        				        		
-	        	)
-		        .onItem().ifNull()
-		        .continueWith(LiveResponse.getDefaultInstance());
+	public Uni<ValidateResponse> validate(ValidateRequest request) {
+		return Live.findBySlug(request.getSlug()).onItem().ifNotNull()
+				.transform(entity -> 
+					ValidateResponse.newBuilder()
+					.setIsValid(entity.password.contentEquals(request.getPassword())).build()
+				)
+				.onItem().ifNull().continueWith(ValidateResponse.getDefaultInstance());
 	}
 }
