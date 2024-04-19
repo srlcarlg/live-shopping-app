@@ -11,9 +11,14 @@ import org.springframework.web.reactive.socket.server.support.WebSocketHandlerAd
 @Configuration
 public class WebSocketConfig {
 	
+	@Bean 
+	public WebSocketServer webSocketServer() {
+		return new WebSocketServer();
+	}
+	
     @Bean
-    public HandlerMapping webSocketMapping() {
-        return new SimpleUrlHandlerMapping(Map.of("/chat/{slug}", new WebSocketServer()), -1); 
+    public HandlerMapping webSocketMapping(WebSocketServer webSocketServer) {
+        return new SimpleUrlHandlerMapping(Map.of("/chat/{slug}", webSocketServer), -1); 
     }
     
     @Bean
