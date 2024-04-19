@@ -4,24 +4,31 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
 import live.chat.LiveResponse;
 import live.chat.grpc.LiveGrpcService;
+import live.chat.websocket.database.ChatMessage;
+import live.chat.websocket.database.ChatMessageRepository;
+import live.chat.websocket.decoders.ReceivedMessage;
+import live.chat.websocket.decoders.ReceivedMessageDecoder;
+import live.chat.websocket.decoders.sub.JoinChat;
+import live.chat.websocket.decoders.sub.MessageChat;
+import live.chat.websocket.encoders.SendChat;
+import live.chat.websocket.encoders.SendChatEncoder;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
-import reactor.netty.channel.AbortedException;
 
 public class WebSocketServer implements WebSocketHandler {
 
-	@Autowired 
-	private LiveGrpcService liveGrpcService;
+	@Autowired LiveGrpcService liveGrpcService;
 	
-	public static Map<String, Sinks.Many<String>> publishers = new ConcurrentHashMap<>();
-    public static Map<String, MessageSubscriber> subscribers = new ConcurrentHashMap<>();
+	@Autowired ChatMessageRepository chatMessageRepository;
+	
+	private static Map<String, Sinks.Many<String>> publishers = new ConcurrentHashMap<>();
+	private static Map<String, MessageSubscriber> subscribers = new ConcurrentHashMap<>();
 
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
@@ -29,7 +36,9 @@ public class WebSocketServer implements WebSocketHandler {
         String slugRoom = path.substring(path.lastIndexOf('/') + 1);
                 
         publishers.computeIfAbsent(slugRoom, p -> Sinks.many().multicast().onBackpressureBuffer());
-        subscribers.computeIfAbsent(slugRoom, s -> new MessageSubscriber(publishers.get(slugRoom)));
+        subscribers.computeIfAbsent(slugRoom, s -> new MessageSubscriber(
+        	publishers.get(slugRoom), chatMessageRepository, liveGrpcService
+        ));
         
         // Validate Slug and Status
         Runnable validate = () -> {
@@ -49,7 +58,7 @@ public class WebSocketServer implements WebSocketHandler {
         
         // Workaround (maybe)
         // To get the session of any incoming message in the subscriber
-        MessageInfo messageInfo = new MessageInfo(session);
+        MessageInfo messageInfo = new MessageInfo(session, slugRoom);
         
         MessageSubscriber subscriber = subscribers.get(slugRoom);
         session.receive()
@@ -68,7 +77,7 @@ public class WebSocketServer implements WebSocketHandler {
 	
     public static void sendMsgAndClose(WebSocketSession session, String msg) {
     	// Will throw AbortedException: Connection has been closed BEFORE send operation
-    	// on every first connection if the WS Server doesn't have ANY active session.
+    	// on every first connection if the WS Server doesn't have ANY session connected.
     	// Is the reason of .onErrorComplete
         session.send(Mono.just(session.textMessage(msg)))
         .then(session.close())
@@ -76,18 +85,82 @@ public class WebSocketServer implements WebSocketHandler {
     }
     
 	private static class MessageSubscriber {
+		
+	    private static LiveGrpcService liveService;
+	    private static ChatMessageRepository messageRepository;
 	    private Sinks.Many<String> msgPublisher; 
-
-	    public MessageSubscriber(Sinks.Many<String> msgPublisher) {
+	    
+	    private Map<WebSocketSession, SessionCredencials> credencials = new ConcurrentHashMap<>();
+	    private boolean lockBroadcaster = false;
+	    
+	    public MessageSubscriber(Sinks.Many<String> msgPublisher,
+	    		ChatMessageRepository messageRepository, LiveGrpcService liveService) {
+	    	
 	    	this.msgPublisher = msgPublisher;
+	    	MessageSubscriber.liveService = liveService;
+	    	MessageSubscriber.messageRepository = messageRepository;
 	    }
 
 	    public void onNext(MessageInfo messageInfo) {
 	    	WebSocketSession session = messageInfo.getSession();
-	    		        	    	
-	    	System.out.println(messageInfo.getSession());
-	        System.out.println(msgPublisher.currentSubscriberCount());
-	        sendToAll(messageInfo.message);
+	    	String slug = messageInfo.getSlug();
+	    	
+	    	ReceivedMessage msg = ReceivedMessageDecoder.decode(messageInfo.getMessage());
+	    	
+	    	if (msg instanceof JoinChat) {
+	    		// Add session
+	    		credencials.computeIfAbsent(session, c -> 
+	    			new SessionCredencials(msg.getUsername(), msg.getEmail(), false)
+	    		);
+	    		
+	    		// If password exists, set current session as Broadcaster
+	    		// and lock to avoid 2 broadcasters in the same room
+	    		if (msg.getPassword() != null && !lockBroadcaster) {
+		    		liveService.validate(slug, msg.getPassword())
+		    		.doOnNext(v -> {
+		    			if (v.getIsValid()) {
+		    				credencials.get(session).setIsBroadcaster(true);
+		    				lockBroadcaster = true;
+		    			} else {
+		    				sendToOne(session, "incorrect-password");
+		    			}
+		    		}).subscribe();
+	    		}
+	    		
+	    		// Send chat messages history
+	    		messageRepository.getLastMessagesByLiveSlug(slug)
+	    		.map(ChatMessage::toSendChat)
+	    		.doOnNext(sc -> {
+	    			sendToOne(session, SendChatEncoder.encoder(sc));
+	    		})
+	    		.subscribe();
+	    		
+	    	} else if (msg instanceof MessageChat) {
+	    		// If session in joined
+	    		if (credencials.containsKey(session)) {
+	    			// Get some previous info and sends message to all sessions
+	    			SendChat sendChat = credencials.get(session).toSendChat();
+	    			sendChat.setMessage(msg.getMessage());
+	    			sendToAll(SendChatEncoder.encoder(sendChat));
+	    			// then save.
+	    			messageRepository.save(new ChatMessage(slug, sendChat)).subscribe();
+	    			
+	    		} else {
+	    			sendToOne(session, "unauthorized");
+	    		}
+	    		
+	    	} else {
+	    		// Only if session is Broadcaster
+	    		if (msg.getString().contentEquals("finish-chat")) {
+	    			if (!credencials.containsKey(session) || (!credencials.get(session).getIsBroadcaster())) {
+		    			sendToOne(session, "unauthorized");
+	    			} else {
+		    			sendToAll("chat-finished");
+	    			}
+	    		} else { 
+	    			sendToOne(session, "unknown-command");
+	    		}
+	    	}
 	    }
 
 	    public void onError(Throwable error) {
@@ -110,9 +183,11 @@ public class WebSocketServer implements WebSocketHandler {
 	private static class MessageInfo {
 		private WebSocketSession session;
 		private String message;
+		private String slug;
 		
-		public MessageInfo(WebSocketSession session) {
+		public MessageInfo(WebSocketSession session, String slug) {
 			this.session = session;
+			this.slug = slug;
 		}
 		
 		public MessageInfo toMessageInfo(String message) {
@@ -125,6 +200,34 @@ public class WebSocketServer implements WebSocketHandler {
 		}
 		public String getMessage() {
 			return message;
+		}
+		public String getSlug() {
+			return slug;
+		}
+	}
+	
+	private static class SessionCredencials {
+		private String username;
+		private String email;
+		private Boolean isBroadcaster;
+		
+		public SessionCredencials(String username, String email, Boolean isBroadcaster) {
+			super();
+			this.username = username;
+			this.email = email;
+			this.isBroadcaster = isBroadcaster;
+		}
+		
+		public SendChat toSendChat() {
+			return new SendChat("", username, email, isBroadcaster);
+		}
+		
+		public Boolean getIsBroadcaster() {
+			return isBroadcaster;
+		}
+		
+		public void setIsBroadcaster(Boolean isBroadcaster) {
+			this.isBroadcaster = isBroadcaster;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package live.chat.websocket;
+package live.chat.websocket.database;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -9,15 +9,17 @@ import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
+import live.chat.websocket.encoders.SendChat;
+
 @Table("messages")
 public class ChatMessage {
 	
-	//The Clustering Key is responsible for data sorting within the partition.
-    @PrimaryKeyColumn(name = "id", ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
+	// The Clustering Key is responsible for data sorting within the partition.
+    @PrimaryKeyColumn(ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
     private UUID id;
     
 	// The Partition Key is responsible for data distribution across your nodes.
-    @PrimaryKeyColumn(name = "liveSlug", type = PrimaryKeyType.PARTITIONED)
+    @PrimaryKeyColumn(type = PrimaryKeyType.PARTITIONED)
     private String liveSlug;
     
 	private String message;
@@ -25,7 +27,7 @@ public class ChatMessage {
 	private String email;
 	private Boolean isBroadcaster;
 	
-    @PrimaryKeyColumn(name = "createAt", ordinal = 0, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
+    @PrimaryKeyColumn(ordinal = 0, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
 	private Timestamp createAt;
 	
 	public ChatMessage(String liveSlug, String message, String username, String email, Boolean isBroadcaster) {
@@ -44,6 +46,19 @@ public class ChatMessage {
 		this.email = "";
 		this.isBroadcaster = null;
 		this.createAt = null;
+	}
+	public ChatMessage(String slug, SendChat sendChat) {
+		this.id = UUID.randomUUID();
+		this.liveSlug = slug;
+		this.message = sendChat.getMessage();
+		this.username = sendChat.getUsername();
+		this.email = sendChat.getEmail();
+		this.isBroadcaster = sendChat.getIsBroadcaster();
+		this.createAt = Timestamp.from(Instant.now());
+	}
+	
+	public static SendChat toSendChat(ChatMessage cMsg) {
+		return new SendChat(cMsg.getMessage(), cMsg.getUsername(), cMsg.getEmail(), cMsg.getIsBroadcaster());
 	}
 	
 	public String getLiveSlug() {
