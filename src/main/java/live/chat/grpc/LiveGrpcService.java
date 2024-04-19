@@ -18,22 +18,16 @@ public class LiveGrpcService {
 		stub = reactorStub; 
 	}
 	
-    public String findBySlug(String slug) {
+    public Mono<LiveResponse> findBySlug(String slug) {
     	Mono<SlugRequest> request = Mono.just(
     			SlugRequest.newBuilder().setSlug(slug).build());
-		Mono<LiveResponse> response = stub.findOneBySlug(request);
-
-		response.subscribe(live -> System.out.println(live.getAllFields().toString()));
-		return "done";
+		 return stub.findOneBySlug(request);
     }
     
-    public String validate(String slug, String password) {
+    public Mono<ValidateResponse> validate(String slug, String password) {
     	Mono<ValidateRequest> request = Mono.just(
     			ValidateRequest.newBuilder()
     			.setSlug(slug).setPassword(password).build());
-		Mono<ValidateResponse> response = stub.validate(request);
-
-		response.subscribe(live -> System.out.println(live.getAllFields().toString()));
-		return "done";
+    	return stub.validate(request);
     }
 }
