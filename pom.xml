@@ -24,15 +24,15 @@
 		<grpc.sales-reactor.version>1.2.4</grpc.sales-reactor.version>
 	</properties>
 	<dependencies>
-		<!--		<dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
-		</dependency>-->
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-		
+
 		<!-- gRPC Client-->
 		<dependency>
 			<groupId>net.devh</groupId>
@@ -51,8 +51,8 @@
 			<artifactId>grpc-protobuf</artifactId>
 			<version>${grpc.version}</version>
 		</dependency>
-		
-		
+
+
 		<!-- Tests -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -90,7 +90,7 @@
 				<version>${os-plugin.version}</version>
 			</extension>
 		</extensions>
-		
+
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
