@@ -3,6 +3,8 @@ package live.store.demo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
 
+import live.store.LiveStoreApplication;
+
 @TestConfiguration(proxyBeanMethods = false)
 public class TestLiveStoreApplication {
 
