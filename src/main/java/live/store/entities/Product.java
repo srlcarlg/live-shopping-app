@@ -5,7 +5,7 @@ import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
 
-import live.store.dto.ProductDTO;
+import live.store.dtos.ProductDTO;
 
 public class Product {
 	
@@ -43,11 +43,11 @@ public class Product {
     }
     
     public void setFromDTO(ProductDTO dto) {
-    	this.setTitle(dto.getTitle());
-		this.setPrice(dto.getPrice());
-		this.setQuantity(dto.getQuantity());
-		this.setTimeLeft(dto.getTimeLeft());
-		this.setImageUrl(dto.getImageUrl());
+    	this.setTitle(dto.getTitle() != null ? dto.getTitle() : this.getTitle());
+		this.setPrice(dto.getPrice()!= null	? dto.getPrice() : this.getPrice());
+		this.setQuantity(dto.getQuantity()!= null ? dto.getQuantity() : this.getQuantity());
+		this.setTimeLeft(dto.getTimeLeft() != null ? dto.getTimeLeft() : this.getTimeLeft());
+		this.setImageUrl(dto.getImageUrl()!= null ? dto.getImageUrl() : this.getImageUrl());
     }
     
 	public Long getId() {
