@@ -13,9 +13,9 @@ public class Product {
     private Long id;
     private String liveSlug;
     private String title;
-    private double price;
-    private int quantity;
-    private int timeLeft;
+    private Double price;
+    private Integer quantity;
+    private Integer timeLeft;
     private String imageUrl;
     private Timestamp createdAt;
     
@@ -28,7 +28,7 @@ public class Product {
         this.imageUrl = "";
         this.createdAt = null;
 	}
-    public Product(String liveSlug, String title, double price, int quantity, int timeLeft, String imageUrl, Timestamp createdAt) {
+    public Product(String liveSlug, String title, Double price, Integer quantity, Integer timeLeft, String imageUrl, Timestamp createdAt) {
         this.liveSlug = liveSlug;
         this.title = title;
         this.price = price;
@@ -49,7 +49,15 @@ public class Product {
 		this.setTimeLeft(dto.getTimeLeft() != null ? dto.getTimeLeft() : this.getTimeLeft());
 		this.setImageUrl(dto.getImageUrl()!= null ? dto.getImageUrl() : this.getImageUrl());
     }
-    
+    public Product(boolean is) {
+        this.liveSlug = "";
+        this.title = "";
+        this.price = 0.0;
+        this.quantity = 0;
+        this.timeLeft = 0;
+        this.imageUrl = "";
+        this.createdAt = null;
+	}
 	public Long getId() {
 		return id;
 	}
@@ -59,13 +67,13 @@ public class Product {
 	public String getTitle() {
 		return title;
 	}
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
-	public int getTimeLeft() {
+	public Integer getTimeLeft() {
 		return timeLeft;
 	}
 	public String getImageUrl() {
@@ -84,13 +92,13 @@ public class Product {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public void setPrice(double price) {
+	public void setPrice(Double price) {
 		this.price = price;
 	}
-	public void setQuantity(int quantity) {
+	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-	public void setTimeLeft(int timeLeft) {
+	public void setTimeLeft(Integer timeLeft) {
 		this.timeLeft = timeLeft;
 	}
 	public void setImageUrl(String imageUrl) {
