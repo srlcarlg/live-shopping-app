@@ -1,4 +1,4 @@
-package live.store.demo;
+package live.store;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
