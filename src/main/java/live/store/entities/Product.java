@@ -1,9 +1,11 @@
-package live.store;
+package live.store.entities;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 
 import org.springframework.data.annotation.Id;
+
+import live.store.dto.ProductDTO;
 
 public class Product {
 	
@@ -17,6 +19,15 @@ public class Product {
     private String imageUrl;
     private Timestamp createdAt;
     
+    public Product() {
+        this.liveSlug = "";
+        this.title = "";
+        this.price = 0.0;
+        this.quantity = 0;
+        this.timeLeft = 0;
+        this.imageUrl = "";
+        this.createdAt = null;
+	}
     public Product(String liveSlug, String title, double price, int quantity, int timeLeft, String imageUrl, Timestamp createdAt) {
         this.liveSlug = liveSlug;
         this.title = title;
@@ -25,6 +36,18 @@ public class Product {
         this.timeLeft = timeLeft;
         this.imageUrl = imageUrl;
         this.createdAt = Timestamp.from(Instant.now());
+    }
+    public Product(String liveSlug) {
+        this.liveSlug = liveSlug;
+        this.createdAt = Timestamp.from(Instant.now());
+    }
+    
+    public void setFromDTO(ProductDTO dto) {
+    	this.setTitle(dto.getTitle());
+		this.setPrice(dto.getPrice());
+		this.setQuantity(dto.getQuantity());
+		this.setTimeLeft(dto.getTimeLeft());
+		this.setImageUrl(dto.getImageUrl());
     }
     
 	public Long getId() {
