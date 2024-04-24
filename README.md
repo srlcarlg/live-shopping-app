@@ -7,16 +7,21 @@
 ### gRPC
 
 ```
+- Client
 Get one live by slug (LiveService, FindOneBySlug)
 Validate live(slug) by password (LiveService, Validate)
+
+- Server
+Get the broadcaster's ws-session ID (ChatService, GetBroadcaster)
+Validate liveSlug (ChatService, Validate)
 ```
 
 ### WEBSOCKET
-*onOpen:* /live-chat/{slug}
+*onOpen:* /chat/{slug}
 
 ```
-- validate slug via gRPC or Cache, sends "slug-not-found" text if no live is found.
-- validate liveStatus via gRPC or Cache, sends "live-finished" text if LiveStatus.DONE.
+- validate slug via gRPC, sends "slug-not-found" text if no live is found.
+- validate liveStatus via gRPC, sends "live-finished" text if LiveStatus.DONE.
 - disconnect or keep connection
 ```
 
@@ -24,7 +29,8 @@ Validate live(slug) by password (LiveService, Validate)
 
 ```
 - receives { username: string, email: string, password: string } -> JoinChat
-	- validate (live)password via gRPC **if exists**, set current session as broadscaster
+	- validate (live)password via gRPC **if exists**, 
+		- set current session as broadcaster and sends its sessionID, else "incorrect-password" 
 	- join the chat room of an existing live and send it's history (last 30 messages)
 
 - receives { message: string } -> MessageChat
@@ -54,7 +60,7 @@ Validate live(slug) by password (LiveService, Validate)
   	  - Websockets
 - gRPC (Reactive)
 	- [Reactor-gRPC (salesforce)](https://github.com/salesforce/reactive-grpc/tree/master/reactor)
-	- [gRPC-Client Spring Boot Starter (grpc-ecosystem)](https://github.com/grpc-ecosystem/grpc-spring)
+	- [gRPC Spring Boot Starter (grpc-ecosystem)](https://github.com/grpc-ecosystem/grpc-spring)
 
 
 ### References
