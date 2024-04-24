@@ -36,19 +36,20 @@ import live.manager.entities.LiveStatus;
 @ApplicationScoped
 public class WebSocketServer {
 
-	
 	protected static final Map<String, ConcurrentLinkedDeque<Session>> ROOMS = new ConcurrentHashMap<>();
 	protected static final Map<String, String> BROADCASTERS_ID = new ConcurrentHashMap<>();
-	public static ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
+	public static final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
 	@OnOpen
 	public void onOpen(Session session, @PathParam("slug") String slug) {
 
 		Panache.withSession(() -> Live.findBySlug(slug)).subscribe().with(item -> {
 			if (item == null) {
+				// Validate slug
 				sendAsync(session, new SendMessage("slug-not-found"));
 				closeSession(session);
 			} else {
+				// Close session if liveStatus.Done
 				if (item.getStatus().equals(LiveStatus.DONE)) {
 					sendAsync(session,  new SendMessage("live-finished"));
 					closeSession(session);
@@ -61,13 +62,12 @@ public class WebSocketServer {
 					BROADCASTERS_ID.computeIfAbsent(slug, s -> "");
 				}
 			}
-		}, failure -> {
-			sendAsync(session, new SendMessage("FAIL"));
-		});
+		}, failure -> sendAsync(session, new SendMessage("FAIL")));
 	}
 
 	@OnClose
 	public void onClose(Session session, @PathParam("slug") String slug) {
+		// Remove from Room then sends users-count to all
 		if (ROOMS.containsKey(slug)) {
 			ROOMS.get(slug).remove(session);
 			sendToAllInclude(slug, new UsersCount(ROOMS.get(slug).size()));
@@ -92,23 +92,18 @@ public class WebSocketServer {
 			
 		} else if (message instanceof SetLiveStatus) {
 			executorService.submit(() -> {
-				try { setLiveStatus(session, slug, message); } catch (Throwable e) {
-					e.printStackTrace();
-				}
+				try { setLiveStatus(session, slug, message); } catch (Throwable e) {}
 			});
 			
 		} else {
 			switch (message.getString()) {
 			case "join":
+				// Send broadcaster's id to current session
 				if (!BROADCASTERS_ID.get(slug).equals("")) {
 					sendAsync(session, new BroadcasterId(BROADCASTERS_ID.get(slug)));
 				}
-				sendToAllExcept(slug, new UsersCount(ROOMS.get(slug).size()), session);
-				break;
-			case "leave":
-				ROOMS.get(slug).remove(session);
-				sendToAllExcept(slug, new UsersCount(ROOMS.get(slug).size()), session);
-				closeSession(session);
+				// Send users-count to all 
+				sendToAllInclude(slug, new UsersCount(ROOMS.get(slug).size()));
 				break;
 			default:
 				sendAsync(session, new SendMessage("unknown-command"));
@@ -120,9 +115,11 @@ public class WebSocketServer {
 	public void setBroadcaster(Session session, String slug, ReceivedMessage message) throws Throwable {
 		VertxContextSupport.subscribeAndAwait(() -> {
 			Panache.withSession(() -> Live.findBySlug(slug)).subscribe().with(item -> {
+				// if password matches, set and send {"broadcaster_id"} to all.
+				// else 'incorrect-password"
 				if (item.password.equals(message.getLivePassword())) {
-					BROADCASTERS_ID.put(slug, message.getJsPeerId());
-					sendToAllInclude(slug, new BroadcasterId(message.getJsPeerId()));
+					BROADCASTERS_ID.put(slug, message.getPeerId());
+					sendToAllInclude(slug, new BroadcasterId(message.getPeerId()));
 				} else {
 					sendAsync(session, new SendMessage("incorrect-password"));
 				}
@@ -135,11 +132,13 @@ public class WebSocketServer {
 	public void setLiveStatus(Session session, String slug, ReceivedMessage message) throws Throwable {
 		VertxContextSupport.subscribeAndAwait(() -> {
 			Panache.withSession(() -> Live.findBySlug(slug)).subscribe().with(item -> {
+				// if password matches, set and send "live-finished" to all.
+				// else 'incorrect-password"
 				if (item.password.equals(message.getLivePassword())) {
 					executorService.submit(() -> {
 						try { changeLiveStatus(slug); } catch (Throwable e) {}
 					});
-					sendToAllExcept(slug, new SendMessage("live-finished"), session);
+					sendToAllInclude(slug, new SendMessage("live-finished"));
 				} else {
 					sendAsync(session, new SendMessage("incorrect-password"));
 				}
@@ -150,18 +149,10 @@ public class WebSocketServer {
 	}
 
 	private void changeLiveStatus(String slug) throws Throwable   {
-		VertxContextSupport.subscribeAndAwait(() -> {
-			return Panache.withTransaction(() -> Live.findBySlug(slug).onItem().ifNotNull()
-					.invoke(live -> live.setStatus(LiveStatus.DONE)));
-		});
-	}
-
-	private void sendToAllExcept(String slug, SendMessage message, Session currentSession) {
-		ROOMS.get(slug).parallelStream().forEach(session -> {
-			if (!session.equals(currentSession)) {
-				sendAsync(session, message);
-			}
-		});
+		VertxContextSupport.subscribeAndAwait(() -> 
+			Panache.withTransaction(() -> Live.findBySlug(slug).onItem().ifNotNull()
+				.invoke(live -> live.setStatus(LiveStatus.DONE)))
+		);
 	}
 
 	private void sendToAllInclude(String slug, SendMessage message) {

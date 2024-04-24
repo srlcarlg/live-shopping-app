@@ -1,15 +1,15 @@
 package live.manager.decoders;
 
 public class ReceivedMessage {
-	private String jsPeerId;
+	private String peerId;
 	private String livePassword;
 	private String string;
 	
 	public ReceivedMessage() {}
 	
-	public ReceivedMessage(String jsPeerId, String livePassword) {
+	public ReceivedMessage(String peerId, String livePassword) {
 		super();
-		this.jsPeerId = jsPeerId;
+		this.peerId = peerId;
 		this.livePassword = livePassword;
 	}
 	public ReceivedMessage(String string) {
@@ -17,8 +17,8 @@ public class ReceivedMessage {
 		this.string = string;
 	}
 
-	public String getJsPeerId() {
-		return jsPeerId;
+	public String getPeerId() {
+		return peerId;
 	}
 	public String getLivePassword() {
 		return livePassword;
@@ -26,8 +26,8 @@ public class ReceivedMessage {
 	public String getString() {
 		return string;
 	}
-	public void setJsPeerId(String jsPeerId) {
-		this.jsPeerId = jsPeerId;
+	public void setPeerId(String jsPeerId) {
+		this.peerId = jsPeerId;
 	}
 	public void setLivePassword(String livePassword) {
 		this.livePassword = livePassword;
@@ -38,6 +38,6 @@ public class ReceivedMessage {
 
 	@Override
 	public String toString() {
-		return "ReceivedMessage{jsPeerId=" + jsPeerId + ", livePassword=" + livePassword + ", string=" + string + "}";
+		return "ReceivedMessage{peerId=" + peerId + ", livePassword=" + livePassword + ", string=" + string + "}";
 	}
 }

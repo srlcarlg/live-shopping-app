@@ -17,8 +17,8 @@ public class ReceivedMessageDecoder implements Decoder.Text<ReceivedMessage> {
 			JsonReader jsonReader = Json.createReader(new StringReader(s));
 			JsonObject jsonObject = jsonReader.readObject();
 			jsonReader.close();
-			return jsonObject.containsKey("js_peer_id")
-				? new SetBroadcaster(jsonObject.getString("js_peer_id"), jsonObject.getString("live_password")) 
+			return jsonObject.containsKey("peer_id")
+				? new SetBroadcaster(jsonObject.getString("peer_id"), jsonObject.getString("live_password")) 
 				: new SetLiveStatus(jsonObject.getString("live_password"));
 		} catch (Exception e) {
 			return new ReceivedMessage(s);
