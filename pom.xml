@@ -33,10 +33,10 @@
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
-		<!-- gRPC Client-->
+		<!-- gRPC Server + Client-->
 		<dependency>
 			<groupId>net.devh</groupId>
-			<artifactId>grpc-client-spring-boot-starter</artifactId>
+			<artifactId>grpc-spring-boot-starter</artifactId>
 			<version>3.1.0.RELEASE</version>
 		</dependency>
 		<!-- gRPC stubs classes for Reactor-->
@@ -51,7 +51,6 @@
 			<artifactId>grpc-protobuf</artifactId>
 			<version>${grpc.version}</version>
 		</dependency>
-
 
 		<!-- Tests -->
 		<dependency>
@@ -82,7 +81,7 @@
 	</dependencies>
 
 	<build>
-
+		<!-- gRPC Interface dependency -->
 		<extensions>
 			<extension>
 				<groupId>kr.motd.maven</groupId>
@@ -96,6 +95,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
 			<plugin>
 				<!-- gRPC Protobuf Maven -->
 				<groupId>org.xolstice.maven.plugins</groupId>
