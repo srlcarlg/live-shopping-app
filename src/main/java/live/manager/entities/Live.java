@@ -1,6 +1,7 @@
 package live.manager.entities;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
@@ -15,19 +16,18 @@ public class Live extends PanacheEntity {
     public String description;
     public String password;
     public LiveStatus status;
-    public LocalDateTime createdAt;
+    public Timestamp createdAt;
 
     public Live() {}
 
-    public Live(String slug, String title, String description, String password, LiveStatus status,
-			LocalDateTime createdAt) {
+    public Live(String slug, String title, String description, String password, LiveStatus status) {
 		super();
 		this.slug = slug;
 		this.title = title;
 		this.description = description;
 		this.password = password;
 		this.status = status;
-		this.createdAt = createdAt;
+		this.createdAt = Timestamp.from(Instant.now());
 	}
 
 	// Active record pattern 
@@ -55,7 +55,7 @@ public class Live extends PanacheEntity {
     public LiveStatus getStatus() {
         return status;
     }
-    public LocalDateTime getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
@@ -74,7 +74,7 @@ public class Live extends PanacheEntity {
     public void setStatus(LiveStatus status) {
         this.status = status;
     }
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 }

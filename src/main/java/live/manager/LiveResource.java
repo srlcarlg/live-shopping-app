@@ -1,6 +1,5 @@
 package live.manager;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
@@ -39,7 +38,7 @@ public class LiveResource {
 		Live live = new Live(
 			randomGenerator.randomString(14),
 			liveRequest.getTitle(), liveRequest.getDescription(), liveRequest.getPassword(),
-			LiveStatus.AVAILABLE, LocalDateTime.now()
+			LiveStatus.AVAILABLE
 		);
 		return live.persist().replaceWith(Response.ok(live).status(Status.CREATED)::build);
 	}

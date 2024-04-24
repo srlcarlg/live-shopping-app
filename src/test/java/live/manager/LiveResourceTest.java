@@ -3,7 +3,6 @@ package live.manager;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +20,7 @@ import live.manager.entities.LiveStatus;
 @TestHTTPEndpoint(LiveResource.class) 
 class LiveResourceTest {
     
-	Live live = new Live("randomSlug", "Title", "Description", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now());
+	Live live = new Live("randomSlug", "Title", "Description", "Pass", LiveStatus.AVAILABLE);
 
 	@BeforeEach
 	void before() {
@@ -64,12 +63,12 @@ class LiveResourceTest {
 
 	@Test
 	public void testEdit() {
-	    Live existingLive = new Live("slugToEdit", "OldTitle", "OldDesc", "OldPass", LiveStatus.AVAILABLE, LocalDateTime.now());
+	    Live existingLive = new Live("slugToEdit", "OldTitle", "OldDesc", "OldPass", LiveStatus.AVAILABLE);
 	    
 	    Mockito.when(Live.findBySlug("slugToEdit")).thenReturn(Uni.createFrom().item(existingLive));
 	    Mockito.when(Live.persist(existingLive)).thenReturn(Uni.createFrom().nullItem());
 
-	    Live updatedLive = new Live("slugToEdit", "OldTitle", "OldDesc", "NewPass", LiveStatus.AVAILABLE, LocalDateTime.now());
+	    Live updatedLive = new Live("slugToEdit", "OldTitle", "OldDesc", "NewPass", LiveStatus.AVAILABLE);
 
 	    given()
 	        .contentType("application/json")

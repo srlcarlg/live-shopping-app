@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class WebSocketServerTest {
 		sharedExecutor.execute(() -> {
             PanacheMock.mock(Live.class);
             Mockito.when(Live.findBySlug("randomSlug")).thenReturn(Uni.createFrom().item(
-            	new Live("randomSlug", "Title", "Desc", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now()))
+            	new Live("randomSlug", "Title", "Desc", "Pass", LiveStatus.AVAILABLE))
             );
 		});
 	}
@@ -71,22 +70,22 @@ public class WebSocketServerTest {
 	@DisplayName("Each Room should have nº sessions")
 	public void testRooms() throws Exception {
         when(Live.findBySlug("room1")).thenReturn(Uni.createFrom().item(
-            new Live("room1", "Title", "Desc", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now()))
+            new Live("room1", "Title", "Desc", "Pass", LiveStatus.AVAILABLE))
         );
         when(Live.findBySlug("room2")).thenReturn(Uni.createFrom().item(
-            new Live("room2", "Title", "Desc", "Pass", LiveStatus.AVAILABLE, LocalDateTime.now()))
+            new Live("room2", "Title", "Desc", "Pass", LiveStatus.AVAILABLE))
         );
         
 		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 		List<String> slugs = Arrays.asList("/room1", "/room1", "/room1", "/room2");
 		
-		slugs.stream().forEach(slug -> { 
+		slugs.parallelStream().forEach(slug -> { 
 			try {
 				container.connectToServer(new Client(), new URI(WS_URI + slug));
 			} catch (DeploymentException | IOException | URISyntaxException e) {}
 		});
         
-		try { Thread.sleep(1000); } catch (Exception e) {}
+		try { Thread.sleep(2000); } catch (Exception e) {}
 		assertEquals(3, WebSocketServer.ROOMS.get("room1").size());
 		assertEquals(1, WebSocketServer.ROOMS.get("room2").size());
 	}
@@ -104,7 +103,7 @@ public class WebSocketServerTest {
         Assertions.assertEquals("slug-not-found", MESSAGES.poll(10, TimeUnit.SECONDS));
         
         when(Live.findBySlug("12345")).thenReturn(Uni.createFrom().item(
-        	new Live("12345", "Title", "Desc", "Pass", LiveStatus.DONE, LocalDateTime.now()))
+        	new Live("12345", "Title", "Desc", "Pass", LiveStatus.DONE))
         );
         Session session = container.connectToServer(new Client(), new URI(WS_URI + "/12345"));
         Assertions.assertEquals("live-finished", MESSAGES.poll(10, TimeUnit.SECONDS));
@@ -119,7 +118,7 @@ public class WebSocketServerTest {
     }
 	
 	@ParameterizedTest
-	@ValueSource(strings = {"join-leave-text", "SetBroadcaster-json", "SetLiveStatus-json"})
+	@ValueSource(strings = {"join-text", "SetBroadcaster-json", "SetLiveStatus-json"})
 	@DisplayName("Expected behavior of each onMessage types")
 	@SuppressWarnings("static-access")
     public void testOnMessage(String messageMethod) throws Exception {
@@ -129,7 +128,7 @@ public class WebSocketServerTest {
 		MESSAGES.clear();
 		
 		switch (messageMethod) {
-		case "join-leave-text": {
+		case "join-text": {
             Map<String, Integer> dataUsers = new HashMap<>();
 			
             //  sends {users_count: int} to all sessions except current.
@@ -145,7 +144,7 @@ public class WebSocketServerTest {
 			        
 					try { Thread.sleep(50); } catch (Exception e) {}
 					MESSAGES.clear();
-					s.getAsyncRemote().sendText("leave");
+					s.close();
 		            dataUsers.put("users_count", 3);
 					Assertions.assertEquals(mapper.writeValueAsString(dataUsers), MESSAGES.pollLast(10, TimeUnit.SECONDS));
 		        }
