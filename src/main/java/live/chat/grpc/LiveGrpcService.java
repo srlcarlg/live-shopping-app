@@ -13,21 +13,17 @@ import reactor.core.publisher.Mono;
 public class LiveGrpcService {
 
 	ReactorLiveServiceStub stub;
-	
-	public LiveGrpcService(ReactorLiveServiceStub reactorStub) { 
-		stub = reactorStub; 
+
+	public LiveGrpcService(ReactorLiveServiceStub reactorStub) {
+		stub = reactorStub;
 	}
-	
-    public Mono<LiveResponse> findBySlug(String slug) {
-    	Mono<SlugRequest> request = Mono.just(
-    			SlugRequest.newBuilder().setSlug(slug).build());
-		 return stub.findOneBySlug(request);
-    }
-    
-    public Mono<ValidateResponse> validate(String slug, String password) {
-    	Mono<ValidateRequest> request = Mono.just(
-    			ValidateRequest.newBuilder()
-    			.setSlug(slug).setPassword(password).build());
-    	return stub.validate(request);
-    }
+
+	public Mono<LiveResponse> findBySlug(String slug) {
+		return stub.findOneBySlug(Mono.just(SlugRequest.newBuilder().setSlug(slug).build()));
+	}
+
+	public Mono<ValidateResponse> validate(String slug, String password) {
+		return stub.validate(Mono.just(ValidateRequest.newBuilder()
+				.setSlug(slug).setPassword(password).build()));
+	}
 }
