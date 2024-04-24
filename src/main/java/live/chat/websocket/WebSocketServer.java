@@ -8,6 +8,7 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
+import live.chat.grpc.ChatGrpcServer;
 import live.chat.grpc.LiveGrpcService;
 import live.chat.grpc.live.LiveResponse;
 import live.chat.websocket.database.ChatMessage;
@@ -22,9 +23,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 public class WebSocketServer implements WebSocketHandler {
-
-	@Autowired LiveGrpcService liveGrpcService;
 	
+	@Autowired LiveGrpcService liveGrpcService;
 	@Autowired ChatMessageRepository chatMessageRepository;
 	
 	private static Map<String, Sinks.Many<String>> publishers = new ConcurrentHashMap<>();
@@ -52,6 +52,8 @@ public class WebSocketServer implements WebSocketHandler {
 					sendMsgAndClose(session, "live-finished");
 					publishers.remove(slugRoom);
 					subscribers.remove(slugRoom);
+				} else {
+					ChatGrpcServer.slugs.add(slugRoom);
 				}
 			}).subscribe();
         };
@@ -121,6 +123,9 @@ public class WebSocketServer implements WebSocketHandler {
 		    			if (v.getIsValid()) {
 		    				credencials.get(session).setIsBroadcaster(true);
 		    				lockBroadcaster = true;
+		    				// sends sessionID then add to gRPC server
+		    				sendToOne(session, session.getId());
+		    				ChatGrpcServer.broadcastersIDs.put(slug, session.getId());
 		    			} else {
 		    				sendToOne(session, "incorrect-password");
 		    			}
