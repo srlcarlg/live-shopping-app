@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import live.store.dtos.ProductDTO;
 import live.store.entities.Product;
+import live.store.grpc.ChatGrpcService;
+import live.store.grpc.chat.BroadcasterResponse;
 import live.store.repositories.ProductRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,6 +24,9 @@ public class ProductController {
 
 	@Autowired
 	private ProductRepository productRepository;
+
+	@Autowired
+	private ChatGrpcService chatGrpcService;
 
 	@GetMapping("/all")
 	public Flux<Product> getAll() {
@@ -34,11 +39,22 @@ public class ProductController {
 	}
 
 	@PostMapping("/{liveSlug}")
-	public Mono<Product> createProduct(@PathVariable String liveSlug, @RequestBody ProductDTO dto) {
-		 // TODO: Validate Slug and Broadcaster ID
-		Product toInsert = new Product(liveSlug);
-		toInsert.setFromDTO(dto);
-		return productRepository.save(toInsert);
+	public Mono<Object> createProduct(@PathVariable String liveSlug, @RequestBody ProductDTO dto) {
+		if (dto.getSessionId() == null) {
+			return Mono.just("sessionId must be not null");
+		}
+		return chatGrpcService.getBroadcaster(liveSlug).flatMap(response -> {
+            if (response.equals(BroadcasterResponse.getDefaultInstance())) {
+            	return Mono.just("broadcaster-not-found");
+            }
+            if (response.getSessionId().equals(dto.getSessionId())) {
+            	Product toInsert = new Product(liveSlug);
+        		toInsert.setFromDTO(dto);
+        		return productRepository.save(toInsert);
+            } else {
+            	return Mono.just("session-unauthorized");
+            }
+        });
 	}
 
 	@PutMapping("/{liveSlug}/{id}")
@@ -47,18 +63,30 @@ public class ProductController {
 			if (!existingProduct.getLiveSlug().equals(liveSlug)) {
 				return Mono.just("slug-unathorized");
 			}
-			existingProduct.setFromDTO(dto);
-			return productRepository.save(existingProduct);
+			return chatGrpcService.getBroadcaster(liveSlug).flatMap(response -> {
+	            if (response.getSessionId().equals(dto.getSessionId())) {
+	    			existingProduct.setFromDTO(dto);
+	    			return productRepository.save(existingProduct);
+	            } else {
+	            	return Mono.just("session-unauthorized");
+	            }
+	        });
 		});
 	}
 
-	@DeleteMapping("/{liveSlug}/{id}")
-	public Mono<Object> deleteProduct(@PathVariable String liveSlug, @PathVariable Long id) {
+	@DeleteMapping("/{liveSlug}/{sessionId}/{id}")
+	public Mono<Object> deleteProduct(@PathVariable String liveSlug, @PathVariable String sessionId, @PathVariable Long id) {
 		return productRepository.findById(id).flatMap(existingProduct -> {
 			if (!existingProduct.getLiveSlug().equals(liveSlug)) {
 				return Mono.just("slug-unathorized");
 			}
-			return productRepository.deleteById(id);
+			return chatGrpcService.getBroadcaster(liveSlug).flatMap(response -> {
+	            if (response.getSessionId().equals(sessionId)) {
+	    			return productRepository.deleteById(id);
+	            } else {
+	            	return Mono.just("session-unauthorized");
+	            }
+	        });
 		});
 	}
 	
