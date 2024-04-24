@@ -1,6 +1,7 @@
 # manager-backend
 
-### All responsabilities
+TODO: Rename crap variables, methods from the code, like js_peer_id, SetLiveStatus
+### All responsibilities
 - Create a new live
 - Get info or change live password
 - Join/start/finish a live by broadcaster
@@ -16,8 +17,8 @@ Edit live password (PUT /lives/{slug})
 ```
 ### gRPC
 ```
-Get one live by slug (LiveGrpc, FindOneBySlug)
-Login/Validate live(slug) by password (LiveGrpc, Login)
+Get one live by slug (LiveService, FindOneBySlug)
+Validate live(slug) by password (LiveService, Validate)
 ```
 ### WEBSOCKET
 *onOpen:* /live/{slug}
@@ -33,23 +34,25 @@ Login/Validate live(slug) by password (LiveGrpc, Login)
 ```
 - "join"
 	- sends {broadcaster-id: string} to current session if exists.
-	- sends {users_count: int} to all sessions except current. 
-
-- "leave"
-	- remove and sends "users_count" message {int} to all sessions except current.
-	- then disconnect.
-
-- receives {js_peer_id: string, live_password: string} -> SetBroadcaster
+	- sends {users_count: int} to all sessions. 
+	
+- receives {peer_id: string, live_password: string} -> SetBroadcaster
 	- validate livePassword, sends "incorrect-password" text if it doesn't match.
-	- sends {broadcaster-id: string} to all sessions, include current.
+	- sends {broadcaster-id: string} to all sessions.
 
 - receives {live_password: string} -> SetLiveStatus 
 	- validate livePassword, sends "incorrect-password" text if it doesn't match.
 	- set liveStatus to DONE.
-	- sends "live-finished" text to all sessions, except current.
+	- sends "live-finished" text to all sessions.
 ```
 
-*onClose:* same as "leave"
+*onClose:* 
+
+```
+- remove and sends {users_count: int} to all sessions.
+- then disconnect.
+```
+
 
 ### Tests
 Quarkus Junit 5, Mockito (Core + Panache)
