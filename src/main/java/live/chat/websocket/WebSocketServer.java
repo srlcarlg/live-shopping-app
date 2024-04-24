@@ -8,8 +8,8 @@ import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
-import live.chat.LiveResponse;
 import live.chat.grpc.LiveGrpcService;
+import live.chat.grpc.live.LiveResponse;
 import live.chat.websocket.database.ChatMessage;
 import live.chat.websocket.database.ChatMessageRepository;
 import live.chat.websocket.decoders.ReceivedMessage;

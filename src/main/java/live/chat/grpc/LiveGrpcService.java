@@ -2,11 +2,11 @@ package live.chat.grpc;
 
 import org.springframework.stereotype.Service;
 
-import live.chat.LiveResponse;
-import live.chat.ReactorLiveServiceGrpc.ReactorLiveServiceStub;
-import live.chat.SlugRequest;
-import live.chat.ValidateRequest;
-import live.chat.ValidateResponse;
+import live.chat.grpc.live.LiveResponse;
+import live.chat.grpc.live.ReactorLiveServiceGrpc.ReactorLiveServiceStub;
+import live.chat.grpc.live.SlugRequest;
+import live.chat.grpc.live.ValidateRequest;
+import live.chat.grpc.live.ValidateResponse;
 import reactor.core.publisher.Mono;
 
 @Service
