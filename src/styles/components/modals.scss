@@ -66,22 +66,19 @@ h4 {
 .modal-inputs {
   .row-inputs {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 
-    .row .inner-row {
+    .row {
       display: flex;
       justify-content: space-between;
+
+      .live-password-input {
+        margin-left: 20px;
+      }
     }
 
-    .colunm {
-      padding-left: 20px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .first-column {
-      display: flex;
-      flex-direction: column;
+    .second-row .live-description-input {
+      width: 450px;
     }
   }
 

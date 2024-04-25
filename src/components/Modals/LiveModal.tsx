@@ -24,27 +24,22 @@ const LiveModal = (props: Props) => {
         <div className="modal-inputs">
           {!isEdit ? (
             <div className="row-inputs">
-              <div className="first-column">
+              <div className="row">
                 <InputModal
                   className="live-title-input"
                   placeholder="Title"
                   onChange={() => {}}
                 />
                 <InputModal
-                  className="live-description-input"
-                  placeholder="Description"
+                  className="live-password-input"
+                  placeholder="Password"
                   onChange={() => {}}
                 />
               </div>
-              <div className="colunm">
+              <div className="second-row">
                 <InputModal
-                  className="live-slug-input"
-                  placeholder="Slug"
-                  onChange={() => {}}
-                />
-                <InputModal
-                  className="live-password-input"
-                  placeholder="Password"
+                  className="live-description-input"
+                  placeholder="Description"
                   onChange={() => {}}
                 />
               </div>
