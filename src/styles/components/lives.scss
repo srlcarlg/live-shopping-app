@@ -48,6 +48,8 @@
   }
 
   table {
+    height: 100%;
+
     .table-header {
       font-size: 16px;
     }
@@ -57,12 +59,11 @@
       display: flex;
       padding-top: 7px;
       font-size: 14px;
-
     }
 
     td {
       width: 100%;
-      overflow: scroll;
+      overflow: hidden;
 
       .actions {
         display: flex;

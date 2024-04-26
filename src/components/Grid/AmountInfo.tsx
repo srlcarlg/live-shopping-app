@@ -1,12 +1,15 @@
-type Props = {};
+type Props = {
+  amount: Amount;
+};
 
 const AmountInfo = (props: Props) => {
+  const { amount } = props;
   return (
-    <tr>
-      <td>The Great Live</td>
-      <td>10</td>
-      <td>$324</td>
-    </tr>
+    <>
+      <td>{amount.liveSlug}</td>
+      <td>{amount.nTransactions}</td>
+      <td>${amount.total}</td>
+    </>
   );
 };
 

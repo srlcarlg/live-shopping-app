@@ -1,4 +1,5 @@
 import React from "react";
+import { CREATE_LIVE_POST } from "../../api/api";
 import InputModal from "./Input";
 
 type Props = {
@@ -8,10 +9,45 @@ type Props = {
 
 const LiveModal = (props: Props) => {
   const { isEdit: isEdit } = props;
+
+  // Modal - Cancel button
   const [cancelClick, setCancelClick] = React.useState(false);
   const handleCancel = () => {
     props.cancelOnClick(cancelClick);
     setCancelClick(!cancelClick);
+  };
+
+  // Modal - Add live
+  const [formData, setFormData] = React.useState({
+    title: "",
+    description: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const { url, options } = CREATE_LIVE_POST(formData);
+      const response = await fetch(url, options);
+      const data: Live = await response.json();
+
+      if (response.ok) {
+        props.cancelOnClick(cancelClick);
+        setCancelClick(!cancelClick);
+        console.log(data);
+      }
+      
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -25,33 +61,47 @@ const LiveModal = (props: Props) => {
           {!isEdit ? (
             <div className="row-inputs">
               <div className="row">
-                <InputModal
-                  className="live-title-input"
-                  placeholder="Title"
-                  onChange={() => {}}
-                />
-                <InputModal
-                  className="live-password-input"
-                  placeholder="Password"
-                  onChange={() => {}}
-                />
+                <form id="live-form" onSubmit={handleSubmit}>
+                  <InputModal
+                    className="live-title-input"
+                    name="title"
+                    placeholder="Title"
+                    value={formData.title}
+                    onChange={handleChange}
+                  />
+                  <InputModal
+                    className="live-password-input"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </form>
               </div>
               <div className="second-row">
-                <InputModal
-                  className="live-description-input"
-                  placeholder="Description"
-                  onChange={() => {}}
-                />
+                <form id="live-form" onSubmit={handleSubmit}>
+                  <InputModal
+                    className="live-description-input"
+                    name="description"
+                    placeholder="Description"
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </form>
               </div>
             </div>
           ) : (
             <div className="row-inputs">
               <div className="first-column">
-                <InputModal
-                  className="live-password-input"
-                  placeholder="Password"
-                  onChange={() => {}}
-                />
+                <form id="live-form" onSubmit={handleSubmit}>
+                  <InputModal
+                    className="live-password-input"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                </form>
               </div>
             </div>
           )}
@@ -59,7 +109,11 @@ const LiveModal = (props: Props) => {
             <button className="btn btn-cancel" onClick={handleCancel}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-live-submit">
+            <button
+              type="submit"
+              form="live-form"
+              className="btn btn-live-submit"
+            >
               Confirm
             </button>
           </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { ALL_LIVES_GET } from "../../api/api";
 import addIcon from "../../assets/add-icon.svg";
 import LiveModal from "../Modals/LiveModal";
 import LiveInfo from "./LiveInfo";
@@ -7,10 +8,32 @@ type Props = {};
 
 const Lives = (props: Props) => {
   const [modalIsOpen, setModalIsOpen] = React.useState(false);
-
   const handleModalCancelClick = (clicked: boolean) => {
     setModalIsOpen(clicked);
   };
+
+  // Get all Lives
+  const sortLiveByCreatedAt = (liveArray: Live[]): Live[] => {
+    return liveArray.sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
+  };
+  const [liveList, setLiveList] = React.useState([] as Live[]);
+  React.useEffect(() => {
+    const fetchLiveList = async () => {
+      try {
+        const { url, options } = ALL_LIVES_GET();
+        const response = await fetch(url, options);
+        const data: Live[] = await response.json();
+
+        const sortedData = sortLiveByCreatedAt(data);
+        setLiveList(sortedData);
+      } catch (err) {}
+    };
+    fetchLiveList();
+  }, [modalIsOpen]);
 
   return (
     <>
@@ -29,27 +52,24 @@ const Lives = (props: Props) => {
             </div>
           </button>
         </div>
-        <div className="table-grid">
-          <table>
+        <table className="table-grid">
+          <thead>
             <tr className="table-header">
-              <td>Id</td>
               <td>Title</td>
               <td>Slug</td>
               <td>Status</td>
               <td>Date</td>
               <td>Actions</td>
             </tr>
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-            <LiveInfo />
-          </table>
-        </div>
+          </thead>
+          <tbody>
+            {liveList.map((live, index) => (
+              <tr key={index}>
+                <LiveInfo live={live} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </>
   );
