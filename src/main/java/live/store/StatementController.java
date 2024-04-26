@@ -1,6 +1,9 @@
 package live.store;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,15 +23,20 @@ public class StatementController {
 	@Autowired
 	private LiveStatementRepository statementRepository;
 
-	@GetMapping("/transactions")
+	@GetMapping(path = "/transactions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<Transaction> getLatestTransactions() {
-		return transactionRepository.findAll();
+		return Flux.interval(Duration.ofSeconds(4)).flatMap(x -> {
+			return transactionRepository.getLastest();
+		});
 	}
-	@GetMapping("/total")
+	
+	@GetMapping(path = "/total", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<StatementTotal> getTotal() {
-		return statementRepository.findAll().flatMap(
-				live -> transactionRepository.findByLiveSlug(live.getLiveSlug())
-				.count().map(x -> new StatementTotal(live, x)));
+		return Flux.interval(Duration.ofSeconds(4)).flatMap(y -> {
+			return statementRepository.findAll().flatMap(
+					live -> transactionRepository.findByLiveSlug(live.getLiveSlug())
+					.count().map(x -> new StatementTotal(live, x)));
+		});
 	}
 
 	@SuppressWarnings("unused")
