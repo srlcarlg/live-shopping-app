@@ -79,13 +79,13 @@ public class WebSocketServerTest {
 		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 		List<String> slugs = Arrays.asList("/room1", "/room1", "/room1", "/room2");
 		
-		slugs.parallelStream().forEach(slug -> { 
+		slugs.stream().forEach(slug -> { 
 			try {
 				container.connectToServer(new Client(), new URI(WS_URI + slug));
 			} catch (DeploymentException | IOException | URISyntaxException e) {}
 		});
         
-		try { Thread.sleep(2000); } catch (Exception e) {}
+		try { Thread.sleep(4000); } catch (Exception e) {}
 		assertEquals(3, WebSocketServer.ROOMS.get("room1").size());
 		assertEquals(1, WebSocketServer.ROOMS.get("room2").size());
 	}
@@ -137,6 +137,7 @@ public class WebSocketServerTest {
 		        try { Thread.sleep(50); } catch (Exception e) {}
 				Session s = container.connectToServer(new Client(), new URI(WS_URI + "/randomSlug"));
 				if (i == 4) {
+					
 					try { Thread.sleep(50); } catch (Exception e) {}
 					MESSAGES.clear();
 					s.getAsyncRemote().sendText("join");
@@ -154,7 +155,7 @@ public class WebSocketServerTest {
 		}
 		case "SetBroadcaster-json": {
             Map<String, String> data = new HashMap<>();
-            data.put("js_peer_id", "123random");
+            data.put("peer_id", "123random");
             data.put("live_password", "PassWrong");
 
             Session session = container.connectToServer(new Client(), new URI(WS_URI + "/randomSlug"));

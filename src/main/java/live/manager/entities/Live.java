@@ -4,18 +4,34 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Sort;
 import io.smallrye.mutiny.Uni;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 
 @Entity
-public class Live extends PanacheEntity {
+public class Live extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(generator = "live_id_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+      name = "live_id_seq", 
+      sequenceName = "live_id_seq"
+    )
+    public Long id;
     public String slug;
     public String title;
     public String description;
     public String password;
+    @Enumerated(EnumType.STRING)
     public LiveStatus status;
+    @Column(name = "created_at")
     public Timestamp createdAt;
 
     public Live() {}
@@ -40,6 +56,9 @@ public class Live extends PanacheEntity {
     }
 
     
+    public Long getId() {
+        return id;
+    }
     public String getSlug() {
         return slug;
     }
@@ -59,6 +78,9 @@ public class Live extends PanacheEntity {
         return createdAt;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
     public void setSlug(String slug) {
         this.slug = slug;
     }
