@@ -1,10 +1,9 @@
 # manager-backend
 
-TODO: Rename crap variables, methods from the code, like js_peer_id, SetLiveStatus
 ### All responsibilities
 - Create a new live
 - Get info or change live password
-- Join/start/finish a live by broadcaster
+- Join/finish a live by broadcaster
 - Join/leave from a live by viewer
 - Handle quantity of viewers
 
@@ -70,3 +69,61 @@ The tests cover most of the situations described above.
 - JDK 21
 	- Virtual Threads
 
+## <a name="usage"></a>Usage
+The application can be run in:
+
+<details>
+<summary><i>Dev mode</i></summary>
+
+**1º Just run.**
+```shell script
+./mvnw compile quarkus:dev
+```
+**Thanks to [Quarkus Dev Services](https://quarkus.io/guides/dev-services)**, a PostgreSQL database is started automatically from a container.
+</details>
+
+<details>
+<summary><i>Packaged running locally (or Docker)</i></summary>
+
+**1º package manager-backend.**
+```shell script
+./mvnw package -DskipTests=true
+```
+**2º Start the PostgreSQL container**:
+```shell script
+docker compose -f postgres-compose.yaml up -d
+```
+**3º Run the package!**
+```shell script
+java -jar ./target/quarkus-app/quarkus-run.jar
+```
+### on Docker
+**Afte 1º just do:**
+```shell script
+docker compose up -d
+```
+</details>
+
+
+<details>
+<summary><i>Native executable running locally (or Docker)</i></summary>
+
+**1º package manager-backend.**
+```shell script
+./mvnw package -DskipTests=true -Dnative -Dquarkus.native.container-build=true
+```
+**2º Start the PostgreSQL container**:
+```shell script
+docker compose -f postgres-compose.yaml up -d
+```
+**3º Run the package!**
+```shell script
+./target/manager-backend-0.0.1-SNAPSHOT-runner
+```
+### on Docker
+**Afte 1º just do:**
+```shell script
+docker compose -f native-compose.yaml up postgres -d
+docker compose -f native-compose.yaml up -d
+```
+</details>
