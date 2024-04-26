@@ -60,3 +60,42 @@ Get total amount per(all) live (GET /store/total
 [Project Reactor Docs](https://projectreactor.io/docs/core/release/reference/)
 
 [ChatGPT - OpenAi](https://chat.openai.com/)
+
+
+## <a name="usage"></a>Usage
+The application can be run in:
+
+<details>
+<summary><i>Dev mode</i></summary>
+
+**1º Start the PostgreSQL container**:
+```shell script
+docker compose -f cassandra-compose.yaml up -d
+```
+**2º Just run.**
+```shell script
+./mvnw compile spring-boot:run 
+```
+</details>
+
+<details>
+<summary><i>Packaged running locally (or Docker)</i></summary>
+
+**1º package live-store.**
+```shell script
+./mvnw package -DskipTests=true
+```
+**2º Start the Cassandra database container**:
+```shell script
+docker compose -f postgres-compose.yaml up -d
+```
+**3º Run the package!**
+```shell script
+java -jar ./target/live-store-0.0.1-SNAPSHOT.jar
+```
+### on Docker
+**Afte 1º just do:**
+```shell script
+docker compose up -d
+```
+</details>
