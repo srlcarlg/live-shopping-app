@@ -1,0 +1,15 @@
+services:
+  cassandra:
+    image: cassandra:latest
+    container_name: cassandra-chat
+    ports:
+      - "9042:9042"
+      
+  init-db:
+    image: cassandra:latest
+    container_name: cassandra-init
+    depends_on:
+      - cassandra
+    entrypoint: ["/cassandra-spring.sh"]
+    volumes:
+      - ./cassandra-spring.sh:/cassandra-spring.sh
