@@ -1,6 +1,6 @@
 services:
   manager:
-    container_name: manager-backend
+    container_name: live-manager
     build:
       context: ./
       dockerfile: src/main/docker/Dockerfile.${QUARKUS_MODE:-jvm}
@@ -11,6 +11,7 @@ services:
       QUARKUS_DATASOURCE_REACTIVE_URL: postgresql://postgres-manager:5433/postgres
     ports:
       - "8080:8080"
+      - "9000:9000"
     networks:
       - live-shopping-network
 
@@ -31,3 +32,4 @@ services:
 networks:
   live-shopping-network:
     name: live-shopping-network
+    external: true
