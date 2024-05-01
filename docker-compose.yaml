@@ -3,18 +3,20 @@ services:
     container_name: live-chat
     restart: always
     build:
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: Dockerfile
     depends_on:
       - cassandra
     environment:
-      GRPC_CLIENT_SOMETHING_ADDRESS: static://manager-backend:9000
+      SERVER_PORT: 8090
+      GRPC_SERVER_PORT: 9090
+      GRPC_CLIENT_SOMETHING_ADDRESS: static://live-manager:9000
       SPRING_CASSANDRA_CONTACT-POINTS: cassandra-chat
     ports:
       - "8090:8090"
-      - "9000:9000"
+      - "9090:9090"
     networks:
       - live-shopping-network
-
 
   cassandra:
     image: cassandra:latest
@@ -24,8 +26,6 @@ services:
     networks:
       - live-shopping-network
 
-
-      
   init-db:
     image: cassandra:latest
     container_name: cassandra-init
@@ -36,7 +36,6 @@ services:
       - ./cassandra-spring.sh:/cassandra-spring.sh
     networks:
       - live-shopping-network
-
 
 networks:
   live-shopping-network:

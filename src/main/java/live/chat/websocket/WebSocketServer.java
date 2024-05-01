@@ -19,8 +19,11 @@ import live.chat.websocket.decoders.sub.JoinChat;
 import live.chat.websocket.decoders.sub.MessageChat;
 import live.chat.websocket.encoders.SendChat;
 import live.chat.websocket.encoders.SendChatEncoder;
+import live.chat.websocket.encoders.SessionBroadcast;
+import live.chat.websocket.encoders.SessionEncoder;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.util.concurrent.Queues;
 
 public class WebSocketServer implements WebSocketHandler {
 	
@@ -28,17 +31,13 @@ public class WebSocketServer implements WebSocketHandler {
 	@Autowired ChatMessageRepository chatMessageRepository;
 	
 	private static Map<String, Sinks.Many<String>> publishers = new ConcurrentHashMap<>();
-	private static Map<String, MessageSubscriber> subscribers = new ConcurrentHashMap<>();
 
 	@Override
 	public Mono<Void> handle(WebSocketSession session) {
         String path = session.getHandshakeInfo().getUri().getPath();
         String slugRoom = path.substring(path.lastIndexOf('/') + 1);
                 
-        publishers.computeIfAbsent(slugRoom, p -> Sinks.many().multicast().onBackpressureBuffer());
-        subscribers.computeIfAbsent(slugRoom, s -> new MessageSubscriber(
-        	publishers.get(slugRoom), chatMessageRepository, liveGrpcService
-        ));
+        publishers.computeIfAbsent(slugRoom, p -> Sinks.many().multicast().onBackpressureBuffer(Queues.XS_BUFFER_SIZE, false));
         
         // Validate Slug and Status
         Runnable validate = () -> {
@@ -47,13 +46,15 @@ public class WebSocketServer implements WebSocketHandler {
 				if (live.equals(LiveResponse.getDefaultInstance())) {
 					sendMsgAndClose(session, "slug-not-found");
 					publishers.remove(slugRoom);
-					subscribers.remove(slugRoom);
+					//subscribers.remove(slugRoom);
 				} else if (live.getStatus().equals("DONE")) {
 					sendMsgAndClose(session, "live-finished");
 					publishers.remove(slugRoom);
-					subscribers.remove(slugRoom);
+					//subscribers.remove(slugRoom);
 				} else {
-					ChatGrpcServer.slugs.add(slugRoom);
+					if (!ChatGrpcServer.slugs.contains(slugRoom)) {
+						ChatGrpcServer.slugs.add(slugRoom);
+					}					
 				}
 			}).subscribe();
         };
@@ -62,7 +63,10 @@ public class WebSocketServer implements WebSocketHandler {
         // To get the session of any incoming message in the subscriber
         MessageInfo messageInfo = new MessageInfo(session, slugRoom);
         
-        MessageSubscriber subscriber = subscribers.get(slugRoom);
+        // MessageSubscriber subscriber = subscribers.get(slugRoom);
+        MessageSubscriber subscriber =  new MessageSubscriber(
+        	publishers.get(slugRoom), chatMessageRepository, liveGrpcService
+        );
         session.receive()
         		.doFirst(validate)
 		        .map(WebSocketMessage::getPayloadAsText)
@@ -122,9 +126,11 @@ public class WebSocketServer implements WebSocketHandler {
 		    		.doOnNext(v -> {
 		    			if (v.getIsValid()) {
 		    				credencials.get(session).setIsBroadcaster(true);
-		    				lockBroadcaster = true;
+		    				// lockBroadcaster = true;
 		    				// sends sessionID then add to gRPC server
-		    				sendToOne(session, session.getId());
+		    				SessionBroadcast toSend = new SessionBroadcast(session.getId());
+		    				sendToOne(session, SessionEncoder.encoder(toSend));
+		    				
 		    				ChatGrpcServer.broadcastersIDs.put(slug, session.getId());
 		    			} else {
 		    				sendToOne(session, "incorrect-password");
@@ -173,7 +179,7 @@ public class WebSocketServer implements WebSocketHandler {
 	    }
 
 	    public void onComplete() {
-	        msgPublisher.tryEmitComplete();
+	        // msgPublisher.tryEmitComplete();
 	    }
 	    
 	    private void sendToOne(WebSocketSession session, String msg) {
