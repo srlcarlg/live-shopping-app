@@ -1,0 +1,14 @@
+services:
+  streaming:
+    container_name: frontend-streaming
+    build:
+      context: ./
+    networks:
+      - live-shopping-network
+    ports:
+      - "5173:5173"
+
+networks:
+  live-shopping-network:
+    name: live-shopping-network
+    external: true
