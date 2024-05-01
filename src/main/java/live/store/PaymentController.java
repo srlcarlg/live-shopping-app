@@ -52,6 +52,10 @@ public class PaymentController {
 			// Save then update live statement
 			Mono<Transaction> transactionMono = transactionRepository.save(transaction);
 			transactionsService.calculateTotalToStatement(liveSlug, price);
+			
+			Integer quantity = product.getQuantity() - payment.getQuantity();
+			product.setQuantity(Math.max(0, quantity));
+			productRepository.save(product).subscribe();
 
 			return transactionMono.map(x -> new TransactionDTO(x.getUuid()));
 		});

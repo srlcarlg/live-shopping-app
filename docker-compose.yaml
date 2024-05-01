@@ -2,16 +2,17 @@ services:
   store:
     container_name: live-store
     build:
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: Dockerfile
     depends_on:
       - postgres
     environment:
+      SERVER_PORT: 8091
       GRPC_CLIENT_SOMETHING_ADDRESS: static://live-chat:9090
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-store:5432/postgres
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres-store:5432/postgres
     ports:
       - "8091:8091"
-      - "9090:9090"
     networks:
       - live-shopping-network
 

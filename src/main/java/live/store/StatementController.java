@@ -25,14 +25,14 @@ public class StatementController {
 
 	@GetMapping(path = "/transactions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<Transaction> getLatestTransactions() {
-		return Flux.interval(Duration.ofSeconds(4)).flatMap(x -> {
+		return Flux.interval(Duration.ofSeconds(2)).flatMap(x -> {
 			return transactionRepository.getLastest();
 		});
 	}
 	
 	@GetMapping(path = "/total", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<StatementTotal> getTotal() {
-		return Flux.interval(Duration.ofSeconds(4)).flatMap(y -> {
+		return Flux.interval(Duration.ofSeconds(2)).flatMap(y -> {
 			return statementRepository.findAll().flatMap(
 					live -> transactionRepository.findByLiveSlug(live.getLiveSlug())
 					.count().map(x -> new StatementTotal(live, x)));
