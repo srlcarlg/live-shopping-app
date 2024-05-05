@@ -19,9 +19,10 @@ const LiveModal = (props: Props) => {
 
   // Modal - Add live
   const [formData, setFormData] = React.useState({
-    title: "",
-    description: "",
-    password: "",
+    title: "The Greatest Live",
+    description:
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos pariatur cum recusandae nostrum optio odio voluptates repellat! Corrupti numquam iste modi quibusdam in ipsum cupiditate, maiores ut doloremque nulla impedit.",
+    password: "123456",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +45,6 @@ const LiveModal = (props: Props) => {
         setCancelClick(!cancelClick);
         console.log(data);
       }
-      
     } catch (error) {
       console.log(error);
     }

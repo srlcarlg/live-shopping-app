@@ -23,11 +23,19 @@ const LiveInfo = (props: Props) => {
       <td>{formatTimestamp(live.createdAt)}</td>
       <td>
         <div className="actions">
-          <a href="">
+          <a
+            href={`${import.meta.env.VITE_STREAMING_URL}/broadcast/${
+              live.slug
+            }`}
+            target="_blank"
+          >
             <img src={broadcastIcon} alt="" />
             Broadcast
           </a>
-          <a href="">
+          <a
+            href={`${import.meta.env.VITE_STREAMING_URL}/view/${live.slug}`}
+            target="_blank"
+          >
             <img src={viewIcon} alt="" />
             View
           </a>
