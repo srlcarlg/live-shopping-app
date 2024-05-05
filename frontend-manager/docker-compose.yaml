@@ -1,0 +1,14 @@
+services:
+  frontend-manager:
+    container_name: frontend-manager
+    build:
+      context: ./
+    networks:
+      - live-shopping-network
+    ports:
+      - "5174:5174"
+
+networks:
+  live-shopping-network:
+    name: live-shopping-network
+    external: true

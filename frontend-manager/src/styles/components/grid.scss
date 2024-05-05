@@ -1,0 +1,28 @@
+  // Grid.tsx
+  .grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+    margin-top: 106px;
+    height: 100vh;
+
+    .grid-row {
+      display: inline-flex;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  .table-grid {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: 1fr;
+    // grid-auto-rows: 115px;
+    grid-gap: 15px;
+    overflow: auto;
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
