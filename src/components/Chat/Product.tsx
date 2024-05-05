@@ -1,4 +1,5 @@
 import React from "react";
+import { ProductResponse } from "../../api/store/models";
 import buyIcon from "../../assets/buy-icon.svg";
 import editIcon from "../../assets/edit-icon.svg";
 import excludeIcon from "../../assets/exclude-icon.svg";
@@ -7,10 +8,13 @@ import timeIcon from "../../assets/time-icon.svg";
 import PaymentModal from "../Modals/PaymentModal";
 import ProductModal from "../Modals/ProdutModal";
 
-type Props = {};
+type Props = {
+  isBroadcaster?: boolean;
+  productResponse?: ProductResponse;
+};
 
 const Product = (props: Props) => {
-  const [isBroadcaster, setIsBroadcaster] = React.useState(true);
+  const { isBroadcaster, productResponse } = props;
 
   const [modalIsOpen, setModalIsOpen] = React.useState(false);
   const [modalIsDelete, setModalIsDelete] = React.useState(false);
@@ -19,7 +23,6 @@ const Product = (props: Props) => {
     setModalIsDelete(isDelete);
     setModalIsOpen(!modalIsOpen);
   };
-
   const handleModalCancelClick = (clicked: boolean) => {
     setModalIsOpen(clicked);
   };
@@ -28,6 +31,7 @@ const Product = (props: Props) => {
     <>
       {modalIsOpen ? (
         <ProductModal
+          productResponse={productResponse}
           isDelete={modalIsDelete}
           cancelOnClick={handleModalCancelClick}
         />
@@ -35,16 +39,19 @@ const Product = (props: Props) => {
         <></>
       )}
       {modalIsOpen && !isBroadcaster ? (
-        <PaymentModal cancelOnClick={handleModalCancelClick} />
+        <PaymentModal
+          productResponse={productResponse}
+          cancelOnClick={handleModalCancelClick}
+        />
       ) : (
         <></>
       )}
-      <div className="product-container">
+      <div key={productResponse?.liveSlug} className="product-container">
         <img src={productImg} alt="" />
         <div className="product-info">
           <div className="text-column">
-            The great headset Stereo/5.1/7.1
-            <span className="price">$30.14</span>
+            {productResponse?.title}
+            <span className="price">${productResponse?.price}</span>
           </div>
           <div className="button-column">
             <div
@@ -54,11 +61,11 @@ const Product = (props: Props) => {
             >
               <div className="text">
                 <img src={timeIcon} alt="" />
-                18:3m left
+                {productResponse?.timeLeft}m left
               </div>
             </div>
             <p>
-              <span className="units">Units:</span> 2
+              <span className="units">Units:</span> {productResponse?.quantity}
             </p>
             {!isBroadcaster ? (
               <button

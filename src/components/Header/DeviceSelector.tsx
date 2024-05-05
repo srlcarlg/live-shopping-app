@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import cameraIcon from "../../assets/header-icons/camera-icon.svg";
 import micIcon from "../../assets/header-icons/mic-icon.svg";
+import { useSession } from "../../context/SessionContext";
 
 interface MediaDeviceInfo {
   deviceId: string;
@@ -15,8 +16,7 @@ function DeviceSelector() {
     microphones: MediaDeviceInfo[];
   }>({ cameras: [], microphones: [] });
 
-  const [cameraId, setCameraId] = useState<string>("");
-  const [microphoneId, setMicrophoneId] = useState<string>("");
+  const { cameraId, setCameraId, microphoneId, setMicrophoneId } = useSession();
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -62,7 +62,7 @@ function DeviceSelector() {
         <img src={cameraIcon} alt="" />
         <select
           id="cameraSelect"
-          value={cameraId}
+          value={cameraId ? cameraId : ""}
           onChange={handleCameraChange}
         >
           <option value="">Select Camera</option>
@@ -78,7 +78,7 @@ function DeviceSelector() {
         <img src={micIcon} alt="" />
         <select
           id="microphoneSelect"
-          value={microphoneId}
+          value={microphoneId ? microphoneId : ""}
           onChange={handleMicrophoneChange}
         >
           <option value="">Select Microphone</option>
