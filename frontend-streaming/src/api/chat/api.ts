@@ -1,0 +1,1 @@
+export const CHAT_WS_URL = `ws://${await import.meta.env.VITE_CHAT_URL_NO_HTTP}/chat`;
