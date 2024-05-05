@@ -1,0 +1,33 @@
+services:
+  store:
+    container_name: live-store
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      SERVER_PORT: 8091
+      GRPC_CLIENT_SOMETHING_ADDRESS: static://live-chat:9090
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres-store:5432/postgres
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres-store:5432/postgres
+    ports:
+      - "8091:8091"
+    networks:
+      - live-shopping-network
+
+  postgres:
+    image: postgres:16.2
+    container_name: postgres-store
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: spring
+    ports:
+      - "5432:5432"
+    networks:
+      - live-shopping-network
+
+networks:
+  live-shopping-network:
+    name: live-shopping-network
+    external: true
