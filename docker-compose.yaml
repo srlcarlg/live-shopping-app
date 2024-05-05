@@ -1,0 +1,46 @@
+services:
+  manager:
+    extends:
+      file: ./live-manager/docker-compose.yaml
+      service: manager
+  postgres:
+    extends:
+      file: ./live-manager/docker-compose.yaml
+      service: postgres
+
+  chat:
+    extends:
+      file: ./live-chat/docker-compose.yaml
+      service: chat
+  cassandra:
+    extends:
+      file: ./live-chat/docker-compose.yaml
+      service: cassandra
+  chat-cassandra-init:
+    extends:
+      file: ./live-chat/docker-compose.yaml
+      service: init-db
+
+  store:
+    extends:
+      file: ./live-store/docker-compose.yaml
+      service: store
+  store-postgres:
+    extends:
+      file: ./live-store/docker-compose.yaml
+      service: postgres
+
+
+  frontend-streaming:
+    extends:
+      file: ./frontend-streaming/docker-compose.yaml
+      service: streaming
+  frontend-manager:
+    extends:
+      file: ./frontend-manager/docker-compose.yaml
+      service: frontend-manager
+
+networks:
+  live-shopping-network:
+    name: live-shopping-network
+    driver: bridge
