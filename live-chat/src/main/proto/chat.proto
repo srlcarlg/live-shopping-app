@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "live.chat.grpc.chat";
+option java_outer_classname = "ChatGrpcProto";
+
+package chat;
+
+service ChatService {
+    rpc GetBroadcaster (SlugRequest) returns (BroadcasterResponse) {}
+    rpc ValidateSlug (SlugRequest) returns (ValidateResponse) {}
+}
+
+message SlugRequest {
+    string slug = 1;
+}
+
+message BroadcasterResponse {
+    string session_id = 1;
+}
+
+message ValidateResponse {
+    bool is_valid = 1;
+}
