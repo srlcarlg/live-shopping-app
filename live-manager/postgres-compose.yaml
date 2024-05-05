@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-manager
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: manager
+    ports:
+      - "5433:5432"
