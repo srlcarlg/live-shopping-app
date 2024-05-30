@@ -1,6 +1,6 @@
 # live-shopping-app
 
-// Gif
+![SegmentLocal](readme_files/overview.gif "some bad quality gif")
 
 It was originally created in order to practice subjects like Reactive Programming, Microservices and related Java frameworks (Spring, Quarkus) along with each Reactive ecosystem (Project Reactor, Eclipse Vert.x / Netty)
 

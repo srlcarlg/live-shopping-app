@@ -6,3 +6,5 @@
 - View total amount of all lives (via SSE)
 - Redirect to frontend-streaming
 
+
+![SegmentLocal](./manager.png "")

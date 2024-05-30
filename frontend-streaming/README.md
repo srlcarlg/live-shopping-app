@@ -12,3 +12,12 @@ There are some unfinished things and lack of polish due to:
 3º Limited React skills.
 
 However, the main functionalities have been implemented, which is a good start.
+
+
+Broadcaster (chat) |  Broadcaster (shop)
+:-------------------------:|:-------------------------:|
+![chat](./readme_files/broadcaster-chat.png)  |  ![shop](./readme_files/broadcaster-shop.png )
+
+Viewer (chat) |  Viewer (shop)
+:-------------------------:|:-------------------------:|
+![chat](./readme_files/viewer-chat.png)  |  ![shop](./readme_files/viewer-shop.png )
