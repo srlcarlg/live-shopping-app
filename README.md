@@ -2,14 +2,14 @@
 
 ![SegmentLocal](readme_files/overview.gif "some bad quality gif")
 
-It was originally created in order to practice subjects like Reactive Programming, Microservices and related Java frameworks (Spring, Quarkus) along with each Reactive ecosystem (Project Reactor, Eclipse Vert.x / Netty)
+It was originally created in order to practice subjects like **Reactive Programming, Microservices** and related Java frameworks **(Spring, Quarkus)** along with each Reactive ecosystem **(Project Reactor, Eclipse Vert.x / Netty)**
 
-As well as frontend programming (HTML, CSS, SASS and React with Typescript) with Figma design tool.
+As well as frontend programming **(HTML, CSS, SASS and React with Typescript)** with **Figma design** tool.
 
 ### Overview
 ![SegmentLocal](readme_files/overview-live-shopping.png "draw.io diagram")
 
-See the README.md of each microservice for more info.
+**See the README.md of each microservice** for more info.
 
 <details>
 <summary><i>Database entities</i></summary>
